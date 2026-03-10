@@ -1,0 +1,18 @@
+type WordData {
+    word: String
+    translation: String
+    insertDateTime: String
+}
+
+input InputWordData {
+    word: String!
+    translation: String!
+}
+
+type Query {
+    getUserWords: [WordData]
+}
+
+type Mutation {
+    addWord(input: InputWordData): Boolean
+}

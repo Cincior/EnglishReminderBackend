@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: word-service
+              uri: http://word-service:7777
+              predicates:
+                - Path=/graphql/wordService
+              filters:
+                - SetPath=/graphql

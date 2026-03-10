@@ -1,0 +1,22 @@
+services:
+  word-service:
+    build: ./WordService
+    container_name: backend-app
+    ports:
+      - "7777:7777"
+    networks:
+      - app-network
+
+  gateway-service:
+    build: ./api-gateway
+    container_name: gateway-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - word-service
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
