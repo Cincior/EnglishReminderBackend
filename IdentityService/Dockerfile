@@ -6,6 +6,6 @@ RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=build /app/target/WordService-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE ${WORD_SERVICE_PORT}
+COPY --from=build /app/target/IdentityService-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE ${IDENTITY_SERVICE_PORT}
 ENTRYPOINT ["java", "-jar", "app.jar"]

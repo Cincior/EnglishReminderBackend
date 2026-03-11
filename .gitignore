@@ -1,0 +1,15 @@
+.idea/
+.vscode/
+*.swp
+*.DS_Store
+*.iml
+
+**/target/
+**/mvnw
+**/mvnw.cmd
+**/.mvn/wrapper/maven-wrapper.jar
+
+.env
+docker-compose.override.yml
+
+*.log

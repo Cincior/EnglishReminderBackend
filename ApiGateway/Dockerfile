@@ -6,6 +6,6 @@ RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=build /app/target/api-gateway-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
+COPY --from=build /app/target/ApiGateway-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE ${GATEWAY_SERVICE_PORT}
 ENTRYPOINT ["java", "-jar", "app.jar"]

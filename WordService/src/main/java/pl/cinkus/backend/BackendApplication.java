@@ -31,8 +31,8 @@ public class BackendApplication {
 
 			repository.save(WordData.builder()
 					.id(UUID.randomUUID())
-					.word("Bread")
-					.translation("Chleb")
+					.word("Chleb")
+					.translation("Bread")
 					.insertDateTime(now())
 					.build());
 		};

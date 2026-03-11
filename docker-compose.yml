@@ -1,19 +1,36 @@
 services:
   word-service:
     build: ./WordService
-    container_name: backend-app
+    container_name: WordService
+    environment:
+      - WORD_SERVICE_PORT=${WORD_SERVICE_PORT}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
     ports:
-      - "7777:7777"
+      - "${WORD_SERVICE_PORT}:${WORD_SERVICE_PORT}"
     networks:
       - app-network
 
   gateway-service:
-    build: ./api-gateway
-    container_name: gateway-app
+    build: ./ApiGateway
+    container_name: ApiGateway
+    environment:
+      - GATEWAY_SERVICE_PORT=${GATEWAY_SERVICE_PORT}
     ports:
-      - "8080:8080"
+      - "${GATEWAY_SERVICE_PORT}:${GATEWAY_SERVICE_PORT}"
     depends_on:
       - word-service
+      - identity-service
+    networks:
+      - app-network
+
+  identity-service:
+    build: ./IdentityService
+    container_name: IdentityService
+    environment:
+      - IDENTITY_SERVICE_PORT=${IDENTITY_SERVICE_PORT}
+    ports:
+      - "${IDENTITY_SERVICE_PORT}:${IDENTITY_SERVICE_PORT}"
     networks:
       - app-network
 
