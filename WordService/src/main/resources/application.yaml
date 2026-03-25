@@ -24,4 +24,4 @@ spring:
       settings:
         web-allow-others: true
 server:
-  port: ${WORD_SERVICE_PORT}
+  port: ${WORD_SERVICE_PORT:777}

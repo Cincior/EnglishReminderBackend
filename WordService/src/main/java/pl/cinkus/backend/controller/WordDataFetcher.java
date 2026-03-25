@@ -5,10 +5,7 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestHeader;
 import pl.cinkus.backend.codegen.types.InputWordData;
-import pl.cinkus.backend.codegen.types.WordData;
-import pl.cinkus.backend.codegen.*;
 import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.service.WordDataService;
 
@@ -16,7 +13,7 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-public class WordDataController {
+public class WordDataFetcher {
     private final WordDataService wordDataService;
 
     @QueryMapping

@@ -1,3 +1,9 @@
 spring:
+  graphql:
+    schema:
+      introspection:
+        enabled: true
   application:
     name: IdentityService
+server:
+  port: ${IDENTITY_SERVICE_PORT:7771}
