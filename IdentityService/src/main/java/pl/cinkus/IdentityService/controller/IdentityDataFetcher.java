@@ -5,6 +5,8 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
+import pl.cinkus.IdentityService.dto.UserDataDTO;
+import pl.cinkus.IdentityService.mapper.UserDataMapper;
 import pl.cinkus.IdentityService.service.IdentityService;
 import pl.cinkus.backend.codegen.types.UserData;
 
@@ -15,6 +17,7 @@ import java.util.List;
 
 public class IdentityDataFetcher {
     private final IdentityService identityService;
+    private final UserDataMapper userDataMapper;
 
     @MutationMapping
     public boolean createUser(@Argument UserData userData) {
