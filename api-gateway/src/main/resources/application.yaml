@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: word-service
+            uri: http://word-service:777
+            predicates:
+              - Path=/graphql/wordService
+            filters:
+              - SetPath=/graphql
+              - AuthApiGateway
+          - id: identity-service
+            uri: http://identity-service:7771
+            predicates:
+              Path=/graphql/IdentityService
+            filters:
+              SetPath=/graphql
+
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECURITY_KEY}
