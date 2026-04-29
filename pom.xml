@@ -22,9 +22,10 @@
     </properties>
 
     <modules>
-        <module>WordService</module>
-        <module>IdentityService</module>
-        <module>ApiGateway</module>
+        <module>word-service</module>
+        <module>identity-service</module>
+        <module>api-gateway</module>
+        <module>common-auth</module>
     </modules>
 
     <dependencyManagement>

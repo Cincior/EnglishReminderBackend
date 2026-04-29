@@ -7,17 +7,27 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="IdentityService" />
-        <module name="ApiGateway" />
-        <module name="WordService" />
+        <module name="api-gateway" />
+        <module name="identity-service" />
+        <module name="common-auth" />
+        <module name="word-service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="commonAuth" target="17" />
+      <module name="commonAuth (1)" target="17" />
+      <module name="commonAuth (2)" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="ApiGateway" options="-parameters" />
-      <module name="IdentityService" options="-parameters" />
-      <module name="WordService" options="-parameters" />
+      <module name="api-gateway" options="-parameters" />
+      <module name="common-auth" options="-parameters" />
+      <module name="commonAuth" options="-parameters" />
+      <module name="commonAuth (1)" options="-parameters" />
+      <module name="commonAuth (2)" options="-parameters" />
+      <module name="identity-service" options="-parameters" />
+      <module name="word-service" options="-parameters" />
     </option>
   </component>
 </project>

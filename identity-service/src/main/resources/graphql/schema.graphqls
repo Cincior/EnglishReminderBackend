@@ -1,0 +1,15 @@
+input UserData {
+    name: String!
+    surname: String!
+    nickName: String!
+    email: String!
+    password: String!
+}
+
+type Query {
+    getAllUsers: [String]
+}
+
+type Mutation {
+    createUser(userData: UserData): Boolean
+}
