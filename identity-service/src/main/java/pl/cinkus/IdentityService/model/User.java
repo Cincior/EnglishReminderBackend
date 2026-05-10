@@ -22,6 +22,7 @@ public class User {
     private UUID id;
     private String name;
     private String surname;
+    private UserRole role;
 
     @Column(unique = true)
     private String nickName;

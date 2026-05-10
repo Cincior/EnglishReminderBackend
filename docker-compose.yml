@@ -1,6 +1,6 @@
 services:
   word-service:
-    build: ./WordService
+    build: ./word-service
     container_name: WordService
     environment:
       - WORD_SERVICE_PORT=${WORD_SERVICE_PORT}
@@ -12,10 +12,12 @@ services:
       - app-network
 
   gateway-service:
-    build: ./ApiGateway
+    build: ./api-gateway
     container_name: ApiGateway
     environment:
       - GATEWAY_SERVICE_PORT=${GATEWAY_SERVICE_PORT}
+      - JWT_SECURITY_KEY=${APPLICATION_SECURITY_JWT_SECRET_KEY}
+      - JWT_EXPIRATION_TIME=${APPLICATION_SECURITY_JWT_EXPIRATION}
     ports:
       - "${GATEWAY_SERVICE_PORT}:${GATEWAY_SERVICE_PORT}"
     depends_on:
@@ -25,10 +27,12 @@ services:
       - app-network
 
   identity-service:
-    build: ./IdentityService
+    build: ./identity-service
     container_name: IdentityService
     environment:
       - IDENTITY_SERVICE_PORT=${IDENTITY_SERVICE_PORT}
+      - JWT_SECURITY_KEY=${APPLICATION_SECURITY_JWT_SECRET_KEY}
+      - JWT_EXPIRATION_TIME=${APPLICATION_SECURITY_JWT_EXPIRATION}
     ports:
       - "${IDENTITY_SERVICE_PORT}:${IDENTITY_SERVICE_PORT}"
     networks:
