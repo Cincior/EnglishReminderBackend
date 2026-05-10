@@ -5,5 +5,12 @@ spring:
         enabled: true
   application:
     name: IdentityService
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECURITY_KEY}
+      expiration: ${JWT_EXPIRATION_TIME:5h}
+
 server:
   port: ${IDENTITY_SERVICE_PORT:7771}

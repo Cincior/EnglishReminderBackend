@@ -1,7 +1,19 @@
-input UserData {
+enum UserRole {
+    ADMIN
+    USER
+    TEACHER
+}
+
+input NewUserData {
     name: String!
     surname: String!
     nickName: String!
+    role: UserRole!
+    email: String!
+    password: String!
+}
+
+input UserLoginData {
     email: String!
     password: String!
 }
@@ -11,5 +23,6 @@ type Query {
 }
 
 type Mutation {
-    createUser(userData: UserData): Boolean
+    register(userData: NewUserData): Boolean
+    login(userLoginData: UserLoginData): String
 }

@@ -1,10 +1,9 @@
 package pl.cinkus.IdentityService.validation;
 
 import org.springframework.stereotype.Component;
-import pl.cinkus.IdentityService.dto.UserDataDTO;
 import pl.cinkus.IdentityService.exception.IdentityServiceException;
-import pl.cinkus.IdentityService.util.ErrorCode;
-import pl.cinkus.backend.codegen.types.UserData;
+import pl.cinkus.IdentityService.exception.ErrorCode;
+import pl.cinkus.backend.codegen.types.NewUserData;
 
 import java.util.regex.Pattern;
 
@@ -18,7 +17,7 @@ public class UserRegistrationValidation {
 
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$");
 
-    public void validate(UserData userData) {
+    public void validate(NewUserData userData) {
         if (userData.getName() == null || !NAME_PATTERN.matcher(userData.getName()).matches()) {
             throw new IdentityServiceException(
                     ErrorCode.VALIDATION_ERROR,

@@ -22,6 +22,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="api-gateway" options="-parameters" />
+      <module name="backend-parent" options="" />
       <module name="common-auth" options="-parameters" />
       <module name="commonAuth" options="-parameters" />
       <module name="commonAuth (1)" options="-parameters" />
