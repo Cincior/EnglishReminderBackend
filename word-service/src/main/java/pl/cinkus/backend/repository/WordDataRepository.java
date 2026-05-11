@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface WordDataRepository extends JpaRepository<WordData, UUID> {
     List<WordData> findByOwnerId(String ownerId);
+    boolean existsByWord(String word);
 }
