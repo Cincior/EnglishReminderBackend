@@ -4,9 +4,16 @@ type WordData {
     insertDateTime: String
 }
 
+type AddWordResult {
+    created: Boolean!
+    wordId: String
+    existingWordId: String
+}
+
 input InputWordData {
     word: String!
     translation: String!
+    forceDuplicate: Boolean!
 }
 
 type Query {
@@ -14,5 +21,5 @@ type Query {
 }
 
 type Mutation {
-    addWord(input: InputWordData): Boolean
+    addWord(input: InputWordData): AddWordResult
 }
