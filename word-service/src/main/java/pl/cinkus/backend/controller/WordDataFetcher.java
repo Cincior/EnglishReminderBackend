@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import pl.cinkus.backend.codegen.types.AddWordResult;
 import pl.cinkus.backend.codegen.types.InputWordData;
 import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.service.WordDataService;
@@ -26,7 +27,7 @@ public class WordDataFetcher {
     }
 
     @MutationMapping
-    public boolean addWord(@Argument(name = "input") InputWordData inputWordData) {
+    public AddWordResult addWord(@Argument(name = "input") InputWordData inputWordData) {
         return wordDataService.addWord(inputWordData, getUserId());
     }
 
