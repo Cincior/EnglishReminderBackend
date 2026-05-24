@@ -18,11 +18,14 @@ services:
       - GATEWAY_SERVICE_PORT=${GATEWAY_SERVICE_PORT}
       - JWT_SECURITY_KEY=${APPLICATION_SECURITY_JWT_SECRET_KEY}
       - JWT_EXPIRATION_TIME=${APPLICATION_SECURITY_JWT_EXPIRATION}
+      - REDIS_HOST=${APPLICATION_REDIS_HOST}
+      - REDIS_PORT=${APPLICATION_REDIS_PORT}
     ports:
       - "${GATEWAY_SERVICE_PORT}:${GATEWAY_SERVICE_PORT}"
     depends_on:
       - word-service
       - identity-service
+      - redis
     networks:
       - app-network
 
@@ -36,6 +39,13 @@ services:
       - JWT_REFRESH_EXPIRATION_TIME=${APPLICATION_SECURITY_JWT_REFRESH_EXPIRATION_TIME}
     ports:
       - "${IDENTITY_SERVICE_PORT}:${IDENTITY_SERVICE_PORT}"
+    networks:
+      - app-network
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
     networks:
       - app-network
 
