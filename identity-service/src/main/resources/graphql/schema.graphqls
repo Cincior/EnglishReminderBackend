@@ -18,11 +18,17 @@ input UserLoginData {
     password: String!
 }
 
+type LoginResult {
+    token: String!
+    refreshToken: String!
+}
+
 type Query {
     getAllUsers: [String]
 }
 
 type Mutation {
     register(userData: NewUserData): Boolean
-    login(userLoginData: UserLoginData): String
+    login(userLoginData: UserLoginData): LoginResult
+    refresh(refreshToken: String!): LoginResult
 }

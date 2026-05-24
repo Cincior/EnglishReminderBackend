@@ -9,8 +9,8 @@ spring:
 application:
   security:
     jwt:
-      secret-key: ${JWT_SECURITY_KEY}
-      expiration: ${JWT_EXPIRATION_TIME:5h}
-
+      secret-key: ${JWT_SECURITY_KEY:iauhsdoiuausyduyasduhgasuydgauysogdoyuasgdouyasgogdas}
+      expiration: ${JWT_EXPIRATION_TIME:1m}
+      refreshExpiration: ${JWT_REFRESH_EXPIRATION_TIME:3d}
 server:
   port: ${IDENTITY_SERVICE_PORT:7771}
