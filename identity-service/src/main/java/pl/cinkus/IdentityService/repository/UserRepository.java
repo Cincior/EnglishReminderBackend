@@ -1,7 +1,7 @@
 package pl.cinkus.IdentityService.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import pl.cinkus.IdentityService.model.User;
+import pl.cinkus.IdentityService.entity.User;
 
 import java.util.Optional;
 import java.util.UUID;

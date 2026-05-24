@@ -1,4 +1,4 @@
-package pl.cinkus.IdentityService.model;
+package pl.cinkus.IdentityService.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pl.cinkus.IdentityService.model.UserRole;
 
 import java.util.UUID;
 
