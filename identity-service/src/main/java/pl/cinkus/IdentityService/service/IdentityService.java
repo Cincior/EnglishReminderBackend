@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.cinkus.IdentityService.client.RabbitMqMessageSender;
 import pl.cinkus.IdentityService.entity.RefreshToken;
 import pl.cinkus.IdentityService.exception.ErrorCode;
 import pl.cinkus.IdentityService.exception.IdentityServiceException;
@@ -12,10 +13,13 @@ import pl.cinkus.IdentityService.mapper.UserDataMapper;
 import pl.cinkus.IdentityService.entity.User;
 import pl.cinkus.IdentityService.repository.RefreshTokenRepository;
 import pl.cinkus.IdentityService.repository.UserRepository;
+import pl.cinkus.IdentityService.util.RegisterCodeGeneration;
 import pl.cinkus.IdentityService.validation.UserRegistrationValidation;
 import pl.cinkus.backend.codegen.types.LoginResult;
 import pl.cinkus.backend.codegen.types.NewUserData;
 import pl.cinkus.backend.codegen.types.UserLoginData;
+import pl.cinkus.backend.codegen.types.UserVerifyData;
+import pl.cinkus.messages.RegistrationNotificationMessage;
 
 import java.time.Instant;
 import java.util.Date;
@@ -33,6 +37,7 @@ public class IdentityService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final UserDataMapper userDataMapper;
+    private final RabbitMqMessageSender rabbitMqMessageSender;
 
     @Transactional
     public void registerUser(NewUserData userData) {
@@ -42,6 +47,10 @@ public class IdentityService {
 
         validation.validate(userData);
 
+        String registrationCode = RegisterCodeGeneration.generateCode();
+
+        log.info("Register Code: " + registrationCode);
+
         userRepository.save(User.builder()
                 .id(UUID.randomUUID())
                 .name(userData.getName())
@@ -50,12 +59,22 @@ public class IdentityService {
                 .role(userDataMapper.toUserRole(userData.getRole()))
                 .email(userData.getEmail())
                 .password(passwordEncoder.encode(userData.getPassword()))
+                .verified(false)
+                .registrationCode(registrationCode)
                 .build());
+
+        rabbitMqMessageSender.sendMessage(RegistrationNotificationMessage.builder()
+                .email(userData.getEmail())
+                .code(registrationCode).build());
     }
 
     public LoginResult login(UserLoginData userLoginData) {
         User user = userRepository.findByEmail(userLoginData.getEmail())
                 .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "User with given email does not exists!"));
+
+        if(!user.isVerified()) {
+            throw new IdentityServiceException(ErrorCode.UNVERIFIED_USER, "User is not verified with a registration code");
+        }
 
         if (!passwordEncoder.matches(userLoginData.getPassword(), user.getPassword())) {
             throw new IdentityServiceException(ErrorCode.INVALID_PASSWORD, "Invalid password!");
@@ -70,7 +89,6 @@ public class IdentityService {
                 .token(token)
                 .refreshToken(refreshToken.getRefreshToken())
                 .build();
-
     }
 
     public LoginResult refreshToken(String userRefreshToken) {
@@ -96,5 +114,21 @@ public class IdentityService {
 
     public List<String> getAllUsers() {
         return userRepository.findAll().stream().map(User::getEmail).toList();
+    }
+
+    @Transactional
+    public void verifyUser(UserVerifyData userVerifyData) {
+        User user = userRepository.findByEmail(userVerifyData.getEmail())
+                .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "User with given email does not exists!"));
+
+        if(user.isVerified()) {
+            throw new IdentityServiceException(ErrorCode.USER_ALREADY_VERIFIED, "User is already verified");
+        }
+
+        if(!user.getRegistrationCode().equals(userVerifyData.getCode())) {
+            throw new IdentityServiceException(ErrorCode.INVALID_VERIFICATION_CODE, "Verification code is wrong");
+        }
+
+        user.setVerified(true);
     }
 }

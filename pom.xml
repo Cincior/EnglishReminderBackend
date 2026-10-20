@@ -37,6 +37,8 @@
         <module>identity-service</module>
         <module>word-service</module>
         <module>api-gateway</module>
+        <module>notification-service</module>
+        <module>common-dto</module>
     </modules>
 
     <dependencyManagement>
@@ -80,6 +82,11 @@
             <dependency>
                 <groupId>pl.cinkus</groupId>
                 <artifactId>common-auth</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pl.cinkus</groupId>
+                <artifactId>common-dto</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
