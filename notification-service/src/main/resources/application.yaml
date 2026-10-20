@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: notification-service
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_NODE_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_PROPERTIES_SMTP_AUTH}
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: "smtp.gmail.com"
+
+app:
+  rabbitmq:
+    queue: ${RABBITMQ_VERIFICATION_CODE_QUEUE}
+    exchange: ${RABBITMQ_NOTIFICATION_EXCHANGE}
+    routing-key: ${RABBITMQ_REGISTRATION_EMAIL_ROUTING_KEY}
+server:
+  port: ${NOTIFICATION_SERVICE_PORT:7772}

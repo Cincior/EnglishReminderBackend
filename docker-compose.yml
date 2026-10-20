@@ -37,10 +37,44 @@ services:
       - JWT_SECURITY_KEY=${APPLICATION_SECURITY_JWT_SECRET_KEY}
       - JWT_EXPIRATION_TIME=${APPLICATION_SECURITY_JWT_EXPIRATION}
       - JWT_REFRESH_EXPIRATION_TIME=${APPLICATION_SECURITY_JWT_REFRESH_EXPIRATION_TIME}
+      - RABBITMQ_NODE_PORT=${RABBITMQ_NODE_PORT}
+      - RABBITMQ_MANAGEMENT_PORT=${RABBITMQ_MANAGEMENT_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_NOTIFICATION_EXCHANGE=${RABBITMQ_NOTIFICATION_EXCHANGE}
+      - RABBITMQ_REGISTRATION_EMAIL_ROUTING_KEY=${RABBITMQ_REGISTRATION_EMAIL_ROUTING_KEY}
     ports:
       - "${IDENTITY_SERVICE_PORT}:${IDENTITY_SERVICE_PORT}"
     networks:
       - app-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  notification-service:
+    build: ./notification-service
+    container_name: NotificationService
+    environment:
+      - RABBITMQ_NODE_PORT=${RABBITMQ_NODE_PORT}
+      - RABBITMQ_MANAGEMENT_PORT=${RABBITMQ_MANAGEMENT_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_NOTIFICATION_EXCHANGE=${RABBITMQ_NOTIFICATION_EXCHANGE}
+      - RABBITMQ_REGISTRATION_EMAIL_ROUTING_KEY=${RABBITMQ_REGISTRATION_EMAIL_ROUTING_KEY}
+      - RABBITMQ_VERIFICATION_CODE_QUEUE=${RABBITMQ_VERIFICATION_CODE_QUEUE}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+    ports:
+      - "${NOTIFICATION_SERVICE_PORT}:${NOTIFICATION_SERVICE_PORT}"
+    networks:
+      - app-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   redis:
     image: redis
@@ -48,6 +82,22 @@ services:
       - "6379:6379"
     networks:
       - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "${RABBITMQ_NODE_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      retries: 12
 
 networks:
   app-network:

@@ -18,6 +18,11 @@ input UserLoginData {
     password: String!
 }
 
+input UserVerifyData {
+    email: String!
+    code: String!
+}
+
 type LoginResult {
     token: String!
     refreshToken: String!
@@ -31,4 +36,5 @@ type Mutation {
     register(userData: NewUserData): Boolean
     login(userLoginData: UserLoginData): LoginResult
     refresh(refreshToken: String!): LoginResult
+    verifyUser(userVerifyData: UserVerifyData): Boolean
 }

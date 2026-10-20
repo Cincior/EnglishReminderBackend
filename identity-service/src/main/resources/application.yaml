@@ -5,6 +5,11 @@ spring:
         enabled: true
   application:
     name: IdentityService
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_NODE_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
 
 application:
   security:
@@ -12,5 +17,8 @@ application:
       secret-key: ${JWT_SECURITY_KEY:iauhsdoiuausyduyasduhgasuydgauysogdoyuasgdouyasgogdas}
       expiration: ${JWT_EXPIRATION_TIME:1m}
       refreshExpiration: ${JWT_REFRESH_EXPIRATION_TIME:3d}
+  rabbitmq:
+    exchange: ${RABBITMQ_NOTIFICATION_EXCHANGE}
+    routing-key: ${RABBITMQ_REGISTRATION_EMAIL_ROUTING_KEY}
 server:
   port: ${IDENTITY_SERVICE_PORT:7771}

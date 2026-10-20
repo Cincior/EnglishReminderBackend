@@ -17,6 +17,7 @@ public class GraphQlExceptionHandler {
                 .build();
     }
 
+    @org.springframework.graphql.data.method.annotation.GraphQlExceptionHandler
     public GraphQLError handleOtherException(Exception e) {
         e.printStackTrace();
 

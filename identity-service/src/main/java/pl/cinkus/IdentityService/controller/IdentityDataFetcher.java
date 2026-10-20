@@ -7,11 +7,14 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import pl.cinkus.IdentityService.client.RabbitMqMessageSender;
 import pl.cinkus.IdentityService.mapper.UserDataMapper;
 import pl.cinkus.IdentityService.service.IdentityService;
 import pl.cinkus.backend.codegen.types.LoginResult;
 import pl.cinkus.backend.codegen.types.NewUserData;
 import pl.cinkus.backend.codegen.types.UserLoginData;
+import pl.cinkus.backend.codegen.types.UserVerifyData;
+import pl.cinkus.messages.RegistrationNotificationMessage;
 
 import java.util.List;
 
@@ -22,10 +25,17 @@ import java.util.List;
 public class IdentityDataFetcher {
     private final IdentityService identityService;
     private final UserDataMapper userDataMapper;
+    private final RabbitMqMessageSender rabbitMqMessageSender;
 
     @MutationMapping
     public boolean register(@Argument NewUserData userData) {
         identityService.registerUser(userData);
+        return true;
+    }
+
+    @MutationMapping
+    public boolean verifyUser(@Argument UserVerifyData userVerifyData) {
+        identityService.verifyUser(userVerifyData);
         return true;
     }
 
@@ -43,6 +53,9 @@ public class IdentityDataFetcher {
 
     @QueryMapping
     public List<String> getAllUsers() {
+//        rabbitMqMessageSender.sendMessage(
+//                RegistrationNotificationMessage.builder().testMessage("kod rejestracji 123").build()
+//        );
         return identityService.getAllUsers();
     }
 }
