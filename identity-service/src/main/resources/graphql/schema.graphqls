@@ -45,4 +45,5 @@ type Mutation {
     verifyUser(userVerifyData: UserVerifyData): Boolean
     resetPasswordRequest(email: String!): Boolean
     resetPassword(resetPasswordData: ResetPasswordData): Boolean
+    logout(refreshToken: String): Boolean
 }

@@ -13,7 +13,7 @@ import pl.cinkus.IdentityService.exception.IdentityServiceException;
 import pl.cinkus.IdentityService.mapper.UserDataMapper;
 import pl.cinkus.IdentityService.entity.User;
 import pl.cinkus.IdentityService.repository.RefreshTokenRepository;
-import pl.cinkus.IdentityService.repository.ResetPasswordCodeRepository;
+import pl.cinkus.IdentityService.repository.ResetPasswordRequestRepository;
 import pl.cinkus.IdentityService.repository.UserRepository;
 import pl.cinkus.IdentityService.util.CodeGeneration;
 import pl.cinkus.IdentityService.validation.UserRegistrationValidation;
@@ -36,7 +36,7 @@ public class IdentityService {
     private final RefreshTokenService refreshTokenService;
     private final UserDataMapper userDataMapper;
     private final RabbitMqMessageSender rabbitMqMessageSender;
-    private final ResetPasswordCodeRepository resetPasswordCodeRepository;
+    private final ResetPasswordRequestRepository resetPasswordRequestRepository;
 
     @Transactional
     public void registerUser(NewUserData userData) {
@@ -138,9 +138,13 @@ public class IdentityService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "User with given email does not exists!"));
 
+        if(!user.isVerified()) {
+            throw new IdentityServiceException(ErrorCode.UNVERIFIED_USER, "Verify your account first!");
+        }
+
         String resetCode = CodeGeneration.generateCode();
 
-        resetPasswordCodeRepository.save(ResetPasswordRequest.builder()
+        resetPasswordRequestRepository.save(ResetPasswordRequest.builder()
                 .resetCode(resetCode)
                 .email(user.getEmail())
                 .build());
@@ -154,8 +158,8 @@ public class IdentityService {
 
     @Transactional
     public void resetPassword(ResetPasswordData resetPasswordData) {
-        ResetPasswordRequest resetPasswordRequest = resetPasswordCodeRepository.findByEmail(resetPasswordData.getEmail())
-                .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "User with given email does not exists!"));
+        ResetPasswordRequest resetPasswordRequest = resetPasswordRequestRepository.findByEmail(resetPasswordData.getEmail())
+                .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "We do not have any reset password request for this email"));
 
         if(!resetPasswordData.getCode().equals(resetPasswordRequest.getResetCode())) {
             throw new IdentityServiceException(ErrorCode.INVALID_RESET_PASSWORD_CODE, "Wrong password reset code!");
@@ -164,7 +168,10 @@ public class IdentityService {
         User user = userRepository.findByEmail(resetPasswordData.getEmail())
                 .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "User with given email does not exists!"));
 
+        validation.validatePassword(resetPasswordData.getNewPassword());
         user.setPassword(passwordEncoder.encode(resetPasswordData.getNewPassword()));
+
+        resetPasswordRequestRepository.delete(resetPasswordRequest);
     }
 
     public void logout(String refreshToken) {
