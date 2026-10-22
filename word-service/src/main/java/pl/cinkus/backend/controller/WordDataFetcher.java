@@ -27,6 +27,7 @@ public class WordDataFetcher {
     }
 
     @MutationMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public AddWordResult addWord(@Argument(name = "input") InputWordData inputWordData) {
         return wordDataService.addWord(inputWordData, getUserId());
     }
