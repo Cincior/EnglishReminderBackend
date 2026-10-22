@@ -8,7 +8,7 @@ import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.exception.ErrorCode;
 import pl.cinkus.backend.exception.WordServiceException;
 import pl.cinkus.backend.mapper.WordDataMapper;
-import pl.cinkus.backend.model.WordData;
+import pl.cinkus.backend.entity.WordData;
 import pl.cinkus.backend.repository.WordDataRepository;
 
 import java.time.LocalDateTime;

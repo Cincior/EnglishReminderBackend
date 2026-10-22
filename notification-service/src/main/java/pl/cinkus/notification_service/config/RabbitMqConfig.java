@@ -27,7 +27,7 @@ public class RabbitMqConfig {
 
     @Bean
     public TopicExchange exchange() {
-        return new TopicExchange(properties.getExchange());
+        return new TopicExchange(properties.getExchange(), true, false);
     }
 
     @Bean

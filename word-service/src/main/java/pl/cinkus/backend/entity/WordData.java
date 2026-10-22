@@ -1,4 +1,4 @@
-package pl.cinkus.backend.model;
+package pl.cinkus.backend.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

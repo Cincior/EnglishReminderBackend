@@ -7,22 +7,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.cinkus.IdentityService.client.RabbitMqMessageSender;
 import pl.cinkus.IdentityService.entity.RefreshToken;
+import pl.cinkus.IdentityService.entity.ResetPasswordRequest;
 import pl.cinkus.IdentityService.exception.ErrorCode;
 import pl.cinkus.IdentityService.exception.IdentityServiceException;
 import pl.cinkus.IdentityService.mapper.UserDataMapper;
 import pl.cinkus.IdentityService.entity.User;
 import pl.cinkus.IdentityService.repository.RefreshTokenRepository;
+import pl.cinkus.IdentityService.repository.ResetPasswordCodeRepository;
 import pl.cinkus.IdentityService.repository.UserRepository;
-import pl.cinkus.IdentityService.util.RegisterCodeGeneration;
+import pl.cinkus.IdentityService.util.CodeGeneration;
 import pl.cinkus.IdentityService.validation.UserRegistrationValidation;
-import pl.cinkus.backend.codegen.types.LoginResult;
-import pl.cinkus.backend.codegen.types.NewUserData;
-import pl.cinkus.backend.codegen.types.UserLoginData;
-import pl.cinkus.backend.codegen.types.UserVerifyData;
-import pl.cinkus.messages.RegistrationNotificationMessage;
+import pl.cinkus.backend.codegen.types.*;
+import pl.cinkus.messages.EmailType;
+import pl.cinkus.messages.SendEmailWithCodeMessage;
 
-import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +36,7 @@ public class IdentityService {
     private final RefreshTokenService refreshTokenService;
     private final UserDataMapper userDataMapper;
     private final RabbitMqMessageSender rabbitMqMessageSender;
+    private final ResetPasswordCodeRepository resetPasswordCodeRepository;
 
     @Transactional
     public void registerUser(NewUserData userData) {
@@ -47,7 +46,7 @@ public class IdentityService {
 
         validation.validate(userData);
 
-        String registrationCode = RegisterCodeGeneration.generateCode();
+        String registrationCode = CodeGeneration.generateCode();
 
         log.info("Register Code: " + registrationCode);
 
@@ -63,8 +62,9 @@ public class IdentityService {
                 .registrationCode(registrationCode)
                 .build());
 
-        rabbitMqMessageSender.sendMessage(RegistrationNotificationMessage.builder()
+        rabbitMqMessageSender.sendMessage(SendEmailWithCodeMessage.builder()
                 .email(userData.getEmail())
+                .emailType(EmailType.VERIFY_REGISTRATION)
                 .code(registrationCode).build());
     }
 
@@ -130,5 +130,47 @@ public class IdentityService {
         }
 
         user.setVerified(true);
+        user.setRegistrationCode(null);
+    }
+
+    @Transactional
+    public void resetPasswordRequest(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "User with given email does not exists!"));
+
+        String resetCode = CodeGeneration.generateCode();
+
+        resetPasswordCodeRepository.save(ResetPasswordRequest.builder()
+                .resetCode(resetCode)
+                .email(user.getEmail())
+                .build());
+
+        rabbitMqMessageSender.sendMessage(SendEmailWithCodeMessage.builder()
+                .emailType(EmailType.RESET_PASSWORD)
+                .email(user.getEmail())
+                .code(resetCode)
+                .build());
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordData resetPasswordData) {
+        ResetPasswordRequest resetPasswordRequest = resetPasswordCodeRepository.findByEmail(resetPasswordData.getEmail())
+                .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "User with given email does not exists!"));
+
+        if(!resetPasswordData.getCode().equals(resetPasswordRequest.getResetCode())) {
+            throw new IdentityServiceException(ErrorCode.INVALID_RESET_PASSWORD_CODE, "Wrong password reset code!");
+        }
+
+        User user = userRepository.findByEmail(resetPasswordData.getEmail())
+                .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "User with given email does not exists!"));
+
+        user.setPassword(passwordEncoder.encode(resetPasswordData.getNewPassword()));
+    }
+
+    public void logout(String refreshToken) {
+        RefreshToken savedRefreshToken = refreshTokenRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new IdentityServiceException(ErrorCode.INVALID_REFRESH_TOKEN, "Could not log out. Try again later"));
+
+        refreshTokenRepository.delete(savedRefreshToken);
     }
 }

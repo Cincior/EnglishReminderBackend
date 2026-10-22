@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @NoArgsConstructor
 public class RabbitMqProperties {
-
     private String queue;
     private String exchange;
     private String routingKey;

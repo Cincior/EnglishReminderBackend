@@ -15,7 +15,7 @@ application:
   security:
     jwt:
       secret-key: ${JWT_SECURITY_KEY:iauhsdoiuausyduyasduhgasuydgauysogdoyuasgdouyasgogdas}
-      expiration: ${JWT_EXPIRATION_TIME:1m}
+      expiration: ${JWT_EXPIRATION_TIME:10m}
       refreshExpiration: ${JWT_REFRESH_EXPIRATION_TIME:3d}
   rabbitmq:
     exchange: ${RABBITMQ_NOTIFICATION_EXCHANGE}
