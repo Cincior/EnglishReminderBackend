@@ -23,6 +23,12 @@ input UserVerifyData {
     code: String!
 }
 
+input ResetPasswordData {
+    email: String!
+    code: String!
+    newPassword: String!
+}
+
 type LoginResult {
     token: String!
     refreshToken: String!
@@ -37,4 +43,7 @@ type Mutation {
     login(userLoginData: UserLoginData): LoginResult
     refresh(refreshToken: String!): LoginResult
     verifyUser(userVerifyData: UserVerifyData): Boolean
+    resetPasswordRequest(email: String!): Boolean
+    resetPassword(resetPasswordData: ResetPasswordData): Boolean
+    logout(refreshToken: String): Boolean
 }

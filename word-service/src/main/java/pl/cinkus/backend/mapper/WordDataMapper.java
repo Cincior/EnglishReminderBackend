@@ -2,7 +2,7 @@ package pl.cinkus.backend.mapper;
 
 
 import pl.cinkus.backend.dto.WordDataDTO;
-import pl.cinkus.backend.model.WordData;
+import pl.cinkus.backend.entity.WordData;
 
 public class WordDataMapper {
     public static WordDataDTO toDTO(WordData wordData) {

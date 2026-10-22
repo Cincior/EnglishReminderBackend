@@ -6,6 +6,15 @@ spring:
     port: ${RABBITMQ_NODE_PORT}
     username: ${RABBITMQ_USER}
     password: ${RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 2000
+          multiplier: 2
+          max-interval: 10000
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
@@ -22,6 +31,8 @@ spring:
             trust: "smtp.gmail.com"
 
 app:
+  mail:
+    from: ${MAIL_FROM:${MAIL_USERNAME}}
   rabbitmq:
     queue: ${RABBITMQ_VERIFICATION_CODE_QUEUE}
     exchange: ${RABBITMQ_NOTIFICATION_EXCHANGE}

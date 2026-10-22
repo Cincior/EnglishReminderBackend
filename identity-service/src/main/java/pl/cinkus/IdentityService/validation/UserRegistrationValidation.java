@@ -18,28 +18,41 @@ public class UserRegistrationValidation {
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[!@#$%^&*(),.?\":{}|<>]).{8,}$");
 
     public void validate(NewUserData userData) {
-        if (userData.getName() == null || !NAME_PATTERN.matcher(userData.getName()).matches()) {
+        validateName(userData.getName());
+        validateSurname(userData.getSurname());
+        validateEmail(userData.getEmail());
+        validatePassword(userData.getPassword());
+    }
+
+    public void validateName(String name) {
+        if (name == null || !NAME_PATTERN.matcher(name).matches()) {
             throw new IdentityServiceException(
                     ErrorCode.VALIDATION_ERROR,
                     "Name is not valid"
             );
         }
+    }
 
-        if (userData.getSurname() == null || !SURNAME_PATTERN.matcher(userData.getSurname()).matches()) {
+    public void validateSurname(String surname) {
+        if (surname == null || !SURNAME_PATTERN.matcher(surname).matches()) {
             throw new IdentityServiceException(
                     ErrorCode.VALIDATION_ERROR,
                     "Surname is not valid"
             );
         }
+    }
 
-        if (userData.getEmail() == null || !EMAIL_PATTERN.matcher(userData.getEmail()).matches()) {
+    public void validateEmail(String email) {
+        if (email == null || !EMAIL_PATTERN.matcher(email).matches()) {
             throw new IdentityServiceException(
                     ErrorCode.VALIDATION_ERROR,
                     "Email is not valid"
             );
         }
+    }
 
-        if (userData.getPassword() == null || !PASSWORD_PATTERN.matcher(userData.getPassword()).matches()) {
+    public void validatePassword(String password) {
+        if (password == null || !PASSWORD_PATTERN.matcher(password).matches()) {
             throw new IdentityServiceException(
                     ErrorCode.VALIDATION_ERROR,
                     "Password is not valid"

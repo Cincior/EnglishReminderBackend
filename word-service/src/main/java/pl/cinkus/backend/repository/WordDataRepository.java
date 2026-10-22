@@ -1,7 +1,7 @@
 package pl.cinkus.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import pl.cinkus.backend.model.WordData;
+import pl.cinkus.backend.entity.WordData;
 
 import java.util.List;
 import java.util.Optional;

@@ -10,11 +10,7 @@ import org.springframework.stereotype.Controller;
 import pl.cinkus.IdentityService.client.RabbitMqMessageSender;
 import pl.cinkus.IdentityService.mapper.UserDataMapper;
 import pl.cinkus.IdentityService.service.IdentityService;
-import pl.cinkus.backend.codegen.types.LoginResult;
-import pl.cinkus.backend.codegen.types.NewUserData;
-import pl.cinkus.backend.codegen.types.UserLoginData;
-import pl.cinkus.backend.codegen.types.UserVerifyData;
-import pl.cinkus.messages.RegistrationNotificationMessage;
+import pl.cinkus.backend.codegen.types.*;
 
 import java.util.List;
 
@@ -51,6 +47,25 @@ public class IdentityDataFetcher {
         return lr;
     }
 
+    @MutationMapping
+    public boolean resetPasswordRequest(@Argument String email) {
+        identityService.resetPasswordRequest(email);
+        return true;
+    }
+
+    @MutationMapping
+    public boolean logout(String refreshToken) {
+        identityService.logout(refreshToken);
+        return true;
+    }
+
+    @MutationMapping
+    public boolean resetPassword(@Argument ResetPasswordData resetPasswordData) {
+        identityService.resetPassword(resetPasswordData);
+        return true;
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @QueryMapping
     public List<String> getAllUsers() {
 //        rabbitMqMessageSender.sendMessage(

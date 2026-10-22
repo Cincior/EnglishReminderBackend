@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegistrationNotificationMessage {
+public class SendEmailWithCodeMessage {
     private String email;
+    private EmailType emailType;
     private String code;
 }
