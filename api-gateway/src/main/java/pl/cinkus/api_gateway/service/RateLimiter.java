@@ -19,37 +19,26 @@ public class RateLimiter {
     private static final Integer TRIES_LIMIT = 30;
     private static final Integer TIME_WINDOW_SECONDS = 60;
     private static final String KEY_PREFIX = "rate_limit:";
-    private RedisScript<Long> redisScript;
-
-    @PostConstruct
-    public void init() {
-        String script =
-                "local current = tonumber(redis.call('GET', KEYS[1])) " +
-                        "if current and current >= tonumber(ARGV[2]) then " +
-                        "    return current + 1 " +
-                        "end " +
-                        "current = redis.call('INCR', KEYS[1]) " +
-                        "if current == 1 then " +
-                        "    redis.call('EXPIRE', KEYS[1], ARGV[1]) " +
-                        "end " +
-                        "return current";
-
-        DefaultRedisScript<Long> defaultScript = new DefaultRedisScript<>();
-        defaultScript.setScriptText(script);
-        defaultScript.setResultType(Long.class);
-        this.redisScript = defaultScript;
-    }
+    private static final RedisScript<Long> RATE_LIMIT_SCRIPT =
+            RedisScript.of(
+                    "local current = redis.call('INCR', KEYS[1]) " +
+                            "if current == 1 then " +
+                            "    redis.call('EXPIRE', KEYS[1], ARGV[1]) " +
+                            "end " +
+                            "return current",
+                    Long.class
+            );
 
     public Mono<Boolean> checkLimit(String userId) {
         return reactiveRedisTemplate.execute(
-                        redisScript,
+                        RATE_LIMIT_SCRIPT,
                         List.of(KEY_PREFIX + userId),
-                        List.of(String.valueOf(TIME_WINDOW_SECONDS), String.valueOf(TRIES_LIMIT))
+                        List.of(String.valueOf(TIME_WINDOW_SECONDS))
                 )
                 .next()
                 .map(count -> count <= TRIES_LIMIT)
-                .onErrorResume(e -> {
-                    log.error("Redis error: ", e);
+                .onErrorResume(error -> {
+                    log.error("Redis error while checking rate limit", error);
                     return Mono.just(true);
                 });
     }
