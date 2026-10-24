@@ -36,7 +36,7 @@ public class WordDataFetcher {
 
     @MutationMapping
     @PreAuthorize("hasRole('USER')")
-    public boolean setLearned(@Argument SetLearnedInput setLearnedInput) {
+    public boolean setLearned(@Argument(name = "setLearnedInput") SetLearnedInput setLearnedInput) {
         wordDataService.setLearned(setLearnedInput.getWordId(), getUserId(), setLearnedInput.getIsLearned());
         return true;
     }

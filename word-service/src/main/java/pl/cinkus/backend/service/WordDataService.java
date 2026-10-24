@@ -23,7 +23,7 @@ public class WordDataService {
     private final WordDataRepository wordDataRepository;
 
     public List<WordDataDTO> getUserWords(String ownerId) {
-        List<WordData> wordDataList = wordDataRepository.findByOwnerId(UUID.fromString(ownerId));
+        List<WordData> wordDataList = wordDataRepository.findByOwnerId(parseUuid(ownerId, "ownerId"));
 
         if(wordDataList.isEmpty()) {
             throw new WordServiceException(ErrorCode.NO_WORDS_FOUND, "User does not have any words");
@@ -34,7 +34,7 @@ public class WordDataService {
 
     public AddWordResult addWord(InputWordData inputWordData, String ownerId) {
         if (!inputWordData.getForceDuplicate()) {
-            return wordDataRepository.findFirstByOwnerIdAndWord(UUID.fromString(ownerId), inputWordData.getWord())
+            return wordDataRepository.findFirstByOwnerIdAndWord(parseUuid(ownerId, "ownerId"), inputWordData.getWord())
                     .map(existingWord -> AddWordResult.newBuilder()
                             .created(false)
                             .existingWordId(existingWord.getId().toString())
@@ -48,7 +48,7 @@ public class WordDataService {
     private AddWordResult saveWord(InputWordData inputWordData, String ownerId) {
         WordData word = WordData.builder()
                 .id(UUID.randomUUID())
-                .ownerId(UUID.fromString(ownerId))
+                .ownerId(parseUuid(ownerId, "ownerId"))
                 .word(inputWordData.getWord())
                 .translation(inputWordData.getTranslation())
                 .insertDateTime(LocalDateTime.now())
@@ -64,7 +64,7 @@ public class WordDataService {
 
     @Transactional
     public void setLearned(String wordId, String userId, boolean isLearned) {
-        WordData wordData = wordDataRepository.findByOwnerIdAndId(UUID.fromString(userId), UUID.fromString(wordId))
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(parseUuid(userId, "userId"), parseUuid(wordId, "wordId"))
                 .orElseThrow(() -> new WordServiceException(ErrorCode.WORD_NOT_FOUND, "We did not find your word!"));
 
         wordData.setLearned(isLearned);
@@ -72,7 +72,7 @@ public class WordDataService {
 
     @Transactional
     public void updateWord(UpdateWordInput input, String ownerId) {
-        WordData wordData = wordDataRepository.findByOwnerIdAndId(UUID.fromString(ownerId), UUID.fromString(input.getWordId()))
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(parseUuid(ownerId, "ownerId"), parseUuid(input.getWordId(), "wordId"))
                 .orElseThrow(() -> new WordServiceException(
                         ErrorCode.WORD_NOT_FOUND,
                         "We did not find your word!"
@@ -84,11 +84,29 @@ public class WordDataService {
 
     @Transactional
     public void deleteWord(String wordId, String ownerId) {
-        WordData wordData = wordDataRepository.findByOwnerIdAndId(UUID.fromString(ownerId), UUID.fromString(wordId))
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(parseUuid(ownerId, "ownerId"), parseUuid(wordId, "wordId"))
                 .orElseThrow(() -> new WordServiceException(
                         ErrorCode.WORD_NOT_FOUND,
                         "We did not find your word!"
                 ));
         wordDataRepository.delete(wordData);
+    }
+
+    private UUID parseUuid(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new WordServiceException(
+                    ErrorCode.INVALID_WORD_ID,
+                    fieldName + " cannot be empty"
+            );
+        }
+
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException exception) {
+            throw new WordServiceException(
+                    ErrorCode.INVALID_WORD_ID,
+                    fieldName + " has an invalid format"
+            );
+        }
     }
 }
