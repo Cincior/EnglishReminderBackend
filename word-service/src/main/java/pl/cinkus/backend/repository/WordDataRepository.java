@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface WordDataRepository extends JpaRepository<WordData, UUID> {
-    List<WordData> findByOwnerId(String ownerId);
-    Optional<WordData> findFirstByOwnerIdAndWord(String ownerId, String word);
+    List<WordData> findByOwnerId(UUID ownerId);
+    Optional<WordData> findFirstByOwnerIdAndWord(UUID ownerId, String word);
+    Optional<WordData> findByOwnerIdAndId(UUID ownerId, UUID wordId);
 }

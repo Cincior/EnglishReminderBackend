@@ -12,7 +12,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WordDataDTO {
+    private String id;
     private String word;
     private String translation;
     private LocalDateTime insertDateTime;
+    private boolean isLearned;
 }

@@ -34,8 +34,6 @@ public class AuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Objec
     public GatewayFilter apply(Object config) {
         return (exchange, chain) -> {
             String token = getToken(exchange.getRequest());
-            log.info("Headery: {}", exchange.getRequest().getHeaders());
-            log.info("token: {}", token);
 
             if(token == null) {
                 return authFailed(exchange.getResponse());
@@ -45,7 +43,6 @@ public class AuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Objec
             if (claims == null) {
                 return authFailed(exchange.getResponse());
             }
-            log.info("Claims: {}", claims);
 
             return rateLimiter.checkLimit(claims.getSubject())
                     .flatMap(isAllowed -> {

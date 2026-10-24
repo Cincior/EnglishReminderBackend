@@ -2,8 +2,10 @@ package pl.cinkus.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.cinkus.backend.codegen.types.AddWordResult;
 import pl.cinkus.backend.codegen.types.InputWordData;
+import pl.cinkus.backend.codegen.types.UpdateWordInput;
 import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.exception.ErrorCode;
 import pl.cinkus.backend.exception.WordServiceException;
@@ -21,7 +23,7 @@ public class WordDataService {
     private final WordDataRepository wordDataRepository;
 
     public List<WordDataDTO> getUserWords(String ownerId) {
-        List<WordData> wordDataList = wordDataRepository.findByOwnerId(ownerId);
+        List<WordData> wordDataList = wordDataRepository.findByOwnerId(UUID.fromString(ownerId));
 
         if(wordDataList.isEmpty()) {
             throw new WordServiceException(ErrorCode.NO_WORDS_FOUND, "User does not have any words");
@@ -32,7 +34,7 @@ public class WordDataService {
 
     public AddWordResult addWord(InputWordData inputWordData, String ownerId) {
         if (!inputWordData.getForceDuplicate()) {
-            return wordDataRepository.findFirstByOwnerIdAndWord(ownerId, inputWordData.getWord())
+            return wordDataRepository.findFirstByOwnerIdAndWord(UUID.fromString(ownerId), inputWordData.getWord())
                     .map(existingWord -> AddWordResult.newBuilder()
                             .created(false)
                             .existingWordId(existingWord.getId().toString())
@@ -46,10 +48,11 @@ public class WordDataService {
     private AddWordResult saveWord(InputWordData inputWordData, String ownerId) {
         WordData word = WordData.builder()
                 .id(UUID.randomUUID())
-                .ownerId(ownerId)
+                .ownerId(UUID.fromString(ownerId))
                 .word(inputWordData.getWord())
                 .translation(inputWordData.getTranslation())
                 .insertDateTime(LocalDateTime.now())
+                .isLearned(false)
                 .build();
 
         WordData savedWord = wordDataRepository.save(word);
@@ -57,5 +60,35 @@ public class WordDataService {
                 .created(true)
                 .wordId(savedWord.getId().toString())
                 .build();
+    }
+
+    @Transactional
+    public void setLearned(String wordId, String userId, boolean isLearned) {
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(UUID.fromString(userId), UUID.fromString(wordId))
+                .orElseThrow(() -> new WordServiceException(ErrorCode.WORD_NOT_FOUND, "We did not find your word!"));
+
+        wordData.setLearned(isLearned);
+    }
+
+    @Transactional
+    public void updateWord(UpdateWordInput input, String ownerId) {
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(UUID.fromString(ownerId), UUID.fromString(input.getWordId()))
+                .orElseThrow(() -> new WordServiceException(
+                        ErrorCode.WORD_NOT_FOUND,
+                        "We did not find your word!"
+                ));
+
+        wordData.setWord(input.getWord());
+        wordData.setTranslation(input.getTranslation());
+    }
+
+    @Transactional
+    public void deleteWord(String wordId, String ownerId) {
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(UUID.fromString(ownerId), UUID.fromString(wordId))
+                .orElseThrow(() -> new WordServiceException(
+                        ErrorCode.WORD_NOT_FOUND,
+                        "We did not find your word!"
+                ));
+        wordDataRepository.delete(wordData);
     }
 }

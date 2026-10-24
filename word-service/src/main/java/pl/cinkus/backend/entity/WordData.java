@@ -18,8 +18,9 @@ import java.util.UUID;
 public class WordData {
     @Id
     private UUID id;
-    private String ownerId;
+    private UUID ownerId;
     private String word;
     private String translation;
     private LocalDateTime insertDateTime;
+    private boolean isLearned;
 }

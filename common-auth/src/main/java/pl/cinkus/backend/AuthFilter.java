@@ -35,9 +35,9 @@ public class AuthFilter extends OncePerRequestFilter {
         }
 
         GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(ROLE.formatted(userRole));
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userId, null, List.of(grantedAuthority));
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userId, null, List.of(grantedAuthority));
 
-        SecurityContextHolder.getContext().setAuthentication(token);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         filterChain.doFilter(request, response);
     }
 }

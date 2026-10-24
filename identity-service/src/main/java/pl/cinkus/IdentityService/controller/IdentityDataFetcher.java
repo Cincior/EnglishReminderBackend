@@ -20,8 +20,6 @@ import java.util.List;
 
 public class IdentityDataFetcher {
     private final IdentityService identityService;
-    private final UserDataMapper userDataMapper;
-    private final RabbitMqMessageSender rabbitMqMessageSender;
 
     @MutationMapping
     public boolean register(@Argument NewUserData userData) {
@@ -42,9 +40,7 @@ public class IdentityDataFetcher {
 
     @MutationMapping
     public LoginResult refresh(@Argument String refreshToken) {
-        LoginResult lr = identityService.refreshToken(refreshToken);
-        log.info("lr: {}", lr);
-        return lr;
+        return identityService.refreshToken(refreshToken);
     }
 
     @MutationMapping
@@ -65,12 +61,9 @@ public class IdentityDataFetcher {
         return true;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @QueryMapping
     public List<String> getAllUsers() {
-//        rabbitMqMessageSender.sendMessage(
-//                RegistrationNotificationMessage.builder().testMessage("kod rejestracji 123").build()
-//        );
+        //toDo check if authenticated and authorize only for admin
         return identityService.getAllUsers();
     }
 }
