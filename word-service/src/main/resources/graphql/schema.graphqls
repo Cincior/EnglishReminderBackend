@@ -1,7 +1,9 @@
 type WordData {
-    word: String
-    translation: String
-    insertDateTime: String
+    id: String!
+    word: String!
+    translation: String!
+    insertDateTime: String!
+    isLearned: Boolean!
 }
 
 type AddWordResult {
@@ -16,10 +18,24 @@ input InputWordData {
     forceDuplicate: Boolean!
 }
 
+input SetLearnedInput {
+    wordId: String!
+    isLearned: Boolean!
+}
+
+input UpdateWordInput {
+    wordId: String!
+    word: String!
+    translation: String!
+}
+
 type Query {
-    getUserWords: [WordData]
+    getUserWords: [WordData!]!
 }
 
 type Mutation {
-    addWord(input: InputWordData): AddWordResult
+    addWord(input: InputWordData!): AddWordResult!
+    setLearned(setLearnedInput: SetLearnedInput!): Boolean!
+    updateWord(input: UpdateWordInput!): Boolean!
+    deleteWord(wordId: String!): Boolean!
 }
