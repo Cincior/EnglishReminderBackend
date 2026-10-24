@@ -3,7 +3,7 @@ package pl.cinkus.IdentityService.initializer;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import pl.cinkus.IdentityService.model.UserRole;
+import pl.cinkus.backend.codegen.types.UserRole;
 
 @Configuration
 @ConfigurationProperties(prefix = "application.admin")

@@ -34,16 +34,37 @@ type LoginResult {
     refreshToken: String!
 }
 
+type RegisterPayload {
+    registered: Boolean!
+    verificationRequired: Boolean!
+}
+
+type VerifyUserPayload {
+    verified: Boolean!
+}
+
+type ResetPasswordRequestPayload {
+    requested: Boolean!
+}
+
+type ResetPasswordPayload {
+    reset: Boolean!
+}
+
+type LogoutPayload {
+    loggedOut: Boolean!
+}
+
 type Query {
-    getAllUsers: [String]
+    getAllUsers: [String!]!
 }
 
 type Mutation {
-    register(userData: NewUserData): Boolean
-    login(userLoginData: UserLoginData): LoginResult
-    refresh(refreshToken: String!): LoginResult
-    verifyUser(userVerifyData: UserVerifyData): Boolean
-    resetPasswordRequest(email: String!): Boolean
-    resetPassword(resetPasswordData: ResetPasswordData): Boolean
-    logout(refreshToken: String): Boolean
+    register(userData: NewUserData!): RegisterPayload!
+    login(userLoginData: UserLoginData!): LoginResult!
+    refresh(refreshToken: String!): LoginResult!
+    verifyUser(userVerifyData: UserVerifyData!): VerifyUserPayload!
+    resetPasswordRequest(email: String!): ResetPasswordRequestPayload!
+    resetPassword(resetPasswordData: ResetPasswordData!): ResetPasswordPayload!
+    logout(refreshToken: String!): LogoutPayload!
 }

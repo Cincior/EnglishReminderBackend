@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import pl.cinkus.IdentityService.entity.RefreshToken;
 import pl.cinkus.IdentityService.exception.ErrorCode;
 import pl.cinkus.IdentityService.exception.IdentityServiceException;
-import pl.cinkus.IdentityService.model.UserRole;
 import pl.cinkus.IdentityService.repository.RefreshTokenRepository;
 import pl.cinkus.IdentityService.util.JwtProperties;
 
