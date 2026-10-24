@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import pl.cinkus.backend.codegen.types.AddWordResult;
 import pl.cinkus.backend.codegen.types.InputWordData;
+import pl.cinkus.backend.codegen.types.SetLearnedInput;
+import pl.cinkus.backend.codegen.types.UpdateWordInput;
 import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.service.WordDataService;
 
@@ -30,6 +32,27 @@ public class WordDataFetcher {
     @PreAuthorize("hasRole('USER')")
     public AddWordResult addWord(@Argument(name = "input") InputWordData inputWordData) {
         return wordDataService.addWord(inputWordData, getUserId());
+    }
+
+    @MutationMapping
+    @PreAuthorize("hasRole('USER')")
+    public boolean setLearned(@Argument SetLearnedInput setLearnedInput) {
+        wordDataService.setLearned(setLearnedInput.getWordId(), getUserId(), setLearnedInput.getIsLearned());
+        return true;
+    }
+
+    @MutationMapping
+    @PreAuthorize("hasRole('USER')")
+    public boolean updateWord(@Argument(name = "input") UpdateWordInput input) {
+        wordDataService.updateWord(input, getUserId());
+        return true;
+    }
+
+    @MutationMapping
+    @PreAuthorize("hasRole('USER')")
+    public boolean deleteWord(@Argument String wordId) {
+        wordDataService.deleteWord(wordId, getUserId());
+        return true;
     }
 
     private String getUserId() {

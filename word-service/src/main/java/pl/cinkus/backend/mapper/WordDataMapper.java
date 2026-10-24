@@ -7,9 +7,11 @@ import pl.cinkus.backend.entity.WordData;
 public class WordDataMapper {
     public static WordDataDTO toDTO(WordData wordData) {
         return WordDataDTO.builder()
+                .id(wordData.getId().toString())
                 .word(wordData.getWord())
                 .translation(wordData.getTranslation())
                 .insertDateTime(wordData.getInsertDateTime())
+                .isLearned(wordData.isLearned())
                 .build();
     }
 }
