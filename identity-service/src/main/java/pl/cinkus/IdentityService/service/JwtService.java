@@ -5,7 +5,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.cinkus.IdentityService.model.UserRole;
+import pl.cinkus.backend.codegen.types.UserRole;
 import pl.cinkus.IdentityService.util.JwtProperties;
 
 import javax.crypto.SecretKey;

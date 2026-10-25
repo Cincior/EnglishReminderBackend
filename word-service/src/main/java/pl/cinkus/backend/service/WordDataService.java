@@ -25,10 +25,6 @@ public class WordDataService {
     public List<WordDataDTO> getUserWords(String ownerId) {
         List<WordData> wordDataList = wordDataRepository.findByOwnerId(parseUuid(ownerId, "ownerId"));
 
-        if(wordDataList.isEmpty()) {
-            throw new WordServiceException(ErrorCode.NO_WORDS_FOUND, "User does not have any words");
-        }
-
         return wordDataList.stream().map(WordDataMapper::toDTO).toList();
     }
 
@@ -95,7 +91,7 @@ public class WordDataService {
     private UUID parseUuid(String value, String fieldName) {
         if (value == null || value.isBlank()) {
             throw new WordServiceException(
-                    ErrorCode.INVALID_WORD_ID,
+                    ErrorCode.INVALID_IDENTIFIER,
                     fieldName + " cannot be empty"
             );
         }
@@ -104,7 +100,7 @@ public class WordDataService {
             return UUID.fromString(value);
         } catch (IllegalArgumentException exception) {
             throw new WordServiceException(
-                    ErrorCode.INVALID_WORD_ID,
+                    ErrorCode.INVALID_IDENTIFIER,
                     fieldName + " has an invalid format"
             );
         }

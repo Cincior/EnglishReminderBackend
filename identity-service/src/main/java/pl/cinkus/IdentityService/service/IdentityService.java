@@ -44,6 +44,10 @@ public class IdentityService {
             throw new IdentityServiceException(ErrorCode.EMAIL_OR_NICKNAME_ALREADY_TAKEN, "User already exists!");
         }
 
+        if(userData.getRole().equals(UserRole.ADMIN)) {
+            throw new IdentityServiceException(ErrorCode.INVALID_ROLE, "You cannot this type of account");
+        }
+
         validation.validate(userData);
 
         String registrationCode = CodeGeneration.generateCode();

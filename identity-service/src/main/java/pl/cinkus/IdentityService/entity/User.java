@@ -1,14 +1,11 @@
 package pl.cinkus.IdentityService.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pl.cinkus.IdentityService.model.UserRole;
+import pl.cinkus.backend.codegen.types.UserRole;
 
 import java.util.UUID;
 
@@ -23,6 +20,8 @@ public class User {
     private UUID id;
     private String name;
     private String surname;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private UserRole role;
 
     @Column(unique = true)

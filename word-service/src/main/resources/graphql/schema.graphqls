@@ -1,5 +1,5 @@
 type WordData {
-    id: String!
+    id: ID!
     word: String!
     translation: String!
     insertDateTime: String!
@@ -8,8 +8,24 @@ type WordData {
 
 type AddWordResult {
     created: Boolean!
-    wordId: String
-    existingWordId: String
+    wordId: ID
+    existingWordId: ID
+}
+
+type SetLearnedPayload {
+    wordId: ID!
+    isLearned: Boolean!
+}
+
+type UpdateWordPayload {
+    wordId: ID!
+    word: String!
+    translation: String!
+}
+
+type DeleteWordPayload {
+    deleted: Boolean!
+    wordId: ID!
 }
 
 input InputWordData {
@@ -19,12 +35,12 @@ input InputWordData {
 }
 
 input SetLearnedInput {
-    wordId: String!
+    wordId: ID!
     isLearned: Boolean!
 }
 
 input UpdateWordInput {
-    wordId: String!
+    wordId: ID!
     word: String!
     translation: String!
 }
@@ -35,7 +51,7 @@ type Query {
 
 type Mutation {
     addWord(input: InputWordData!): AddWordResult!
-    setLearned(setLearnedInput: SetLearnedInput!): Boolean!
-    updateWord(input: UpdateWordInput!): Boolean!
-    deleteWord(wordId: String!): Boolean!
+    setLearned(setLearnedInput: SetLearnedInput!): SetLearnedPayload!
+    updateWord(input: UpdateWordInput!): UpdateWordPayload!
+    deleteWord(wordId: ID!): DeleteWordPayload!
 }
