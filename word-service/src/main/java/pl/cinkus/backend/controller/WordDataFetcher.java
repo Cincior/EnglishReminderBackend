@@ -11,6 +11,9 @@ import org.springframework.stereotype.Controller;
 import pl.cinkus.backend.codegen.types.AddWordResult;
 import pl.cinkus.backend.codegen.types.InputWordData;
 import pl.cinkus.backend.codegen.types.SetLearnedInput;
+import pl.cinkus.backend.codegen.types.SetLearnedPayload;
+import pl.cinkus.backend.codegen.types.UpdateWordPayload;
+import pl.cinkus.backend.codegen.types.DeleteWordPayload;
 import pl.cinkus.backend.codegen.types.UpdateWordInput;
 import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.service.WordDataService;
@@ -36,23 +39,33 @@ public class WordDataFetcher {
 
     @MutationMapping
     @PreAuthorize("hasRole('USER')")
-    public boolean setLearned(@Argument(name = "setLearnedInput") SetLearnedInput setLearnedInput) {
+    public SetLearnedPayload setLearned(@Argument(name = "setLearnedInput") SetLearnedInput setLearnedInput) {
         wordDataService.setLearned(setLearnedInput.getWordId(), getUserId(), setLearnedInput.getIsLearned());
-        return true;
+        return SetLearnedPayload.newBuilder()
+                .wordId(setLearnedInput.getWordId())
+                .isLearned(setLearnedInput.getIsLearned())
+                .build();
     }
 
     @MutationMapping
     @PreAuthorize("hasRole('USER')")
-    public boolean updateWord(@Argument(name = "input") UpdateWordInput input) {
+    public UpdateWordPayload updateWord(@Argument(name = "input") UpdateWordInput input) {
         wordDataService.updateWord(input, getUserId());
-        return true;
+        return UpdateWordPayload.newBuilder()
+                .wordId(input.getWordId())
+                .word(input.getWord())
+                .translation(input.getTranslation())
+                .build();
     }
 
     @MutationMapping
     @PreAuthorize("hasRole('USER')")
-    public boolean deleteWord(@Argument String wordId) {
+    public DeleteWordPayload deleteWord(@Argument String wordId) {
         wordDataService.deleteWord(wordId, getUserId());
-        return true;
+        return DeleteWordPayload.newBuilder()
+                .deleted(true)
+                .wordId(wordId)
+                .build();
     }
 
     private String getUserId() {

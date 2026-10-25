@@ -22,15 +22,20 @@ public class IdentityDataFetcher {
     private final IdentityService identityService;
 
     @MutationMapping
-    public boolean register(@Argument NewUserData userData) {
+    public RegisterPayload register(@Argument NewUserData userData) {
         identityService.registerUser(userData);
-        return true;
+        return RegisterPayload.newBuilder()
+                .registered(true)
+                .verificationRequired(true)
+                .build();
     }
 
     @MutationMapping
-    public boolean verifyUser(@Argument UserVerifyData userVerifyData) {
+    public VerifyUserPayload verifyUser(@Argument UserVerifyData userVerifyData) {
         identityService.verifyUser(userVerifyData);
-        return true;
+        return VerifyUserPayload.newBuilder()
+                .verified(true)
+                .build();
     }
 
     @MutationMapping
@@ -44,21 +49,27 @@ public class IdentityDataFetcher {
     }
 
     @MutationMapping
-    public boolean resetPasswordRequest(@Argument String email) {
+    public ResetPasswordRequestPayload resetPasswordRequest(@Argument String email) {
         identityService.resetPasswordRequest(email);
-        return true;
+        return ResetPasswordRequestPayload.newBuilder()
+                .requested(true)
+                .build();
     }
 
     @MutationMapping
-    public boolean logout(String refreshToken) {
+    public LogoutPayload logout(@Argument String refreshToken) {
         identityService.logout(refreshToken);
-        return true;
+        return LogoutPayload.newBuilder()
+                .loggedOut(true)
+                .build();
     }
 
     @MutationMapping
-    public boolean resetPassword(@Argument ResetPasswordData resetPasswordData) {
+    public ResetPasswordPayload resetPassword(@Argument ResetPasswordData resetPasswordData) {
         identityService.resetPassword(resetPasswordData);
-        return true;
+        return ResetPasswordPayload.newBuilder()
+                .reset(true)
+                .build();
     }
 
     @QueryMapping

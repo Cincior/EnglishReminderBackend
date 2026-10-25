@@ -1,10 +1,8 @@
-scalar DateTime
-
 type WordData {
     id: ID!
     word: String!
     translation: String!
-    insertDateTime: DateTime!
+    insertDateTime: String!
     isLearned: Boolean!
 }
 
@@ -37,12 +35,12 @@ input InputWordData {
 }
 
 input SetLearnedInput {
-    wordId: String!
+    wordId: ID!
     isLearned: Boolean!
 }
 
 input UpdateWordInput {
-    wordId: String!
+    wordId: ID!
     word: String!
     translation: String!
 }
