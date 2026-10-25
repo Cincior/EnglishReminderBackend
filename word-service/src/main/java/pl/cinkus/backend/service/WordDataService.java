@@ -3,6 +3,7 @@ package pl.cinkus.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 import pl.cinkus.backend.codegen.types.AddWordResult;
 import pl.cinkus.backend.codegen.types.InputWordData;
 import pl.cinkus.backend.codegen.types.UpdateWordInput;
@@ -11,7 +12,9 @@ import pl.cinkus.backend.exception.ErrorCode;
 import pl.cinkus.backend.exception.WordServiceException;
 import pl.cinkus.backend.mapper.WordDataMapper;
 import pl.cinkus.backend.entity.WordData;
+import pl.cinkus.backend.entity.WordTestResult;
 import pl.cinkus.backend.repository.WordDataRepository;
+import pl.cinkus.backend.repository.WordTestResultRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,10 +24,14 @@ import java.util.UUID;
 @Service
 public class WordDataService {
     private final WordDataRepository wordDataRepository;
+    private final WordTestResultRepository wordTestResultRepository;
+    private final RestClient restClient;
 
     public List<WordDataDTO> getUserWords(String ownerId) {
         List<WordData> wordDataList = wordDataRepository.findByOwnerId(parseUuid(ownerId, "ownerId"));
 
+        //Todo get predictions for learning advancement for each words.
+        System.out.println(restClient.get().uri("/predict").retrieve().body(String.class));
         return wordDataList.stream().map(WordDataMapper::toDTO).toList();
     }
 
@@ -39,6 +46,31 @@ public class WordDataService {
         }
 
         return saveWord(inputWordData, ownerId);
+    }
+
+    @Transactional
+    public WordTestResult testWord(String wordId, String translation, String userId) {
+        UUID parsedUserId = parseUuid(userId, "userId");
+        UUID parsedWordId = parseUuid(wordId, "wordId");
+
+        if (translation == null || translation.isBlank()) {
+            throw new WordServiceException(ErrorCode.INVALID_IDENTIFIER, "translation cannot be empty");
+        }
+
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(parsedUserId, parsedWordId)
+                .orElseThrow(() -> new WordServiceException(
+                        ErrorCode.WORD_NOT_FOUND,
+                        "We did not find your word!"
+                ));
+
+        boolean isCorrect = wordData.getTranslation().trim().equalsIgnoreCase(translation.trim());
+        WordTestResult result = new WordTestResult();
+        result.setTestId(UUID.randomUUID());
+        result.setWordId(parsedWordId);
+        result.setUserId(parsedUserId);
+        result.setCorrect(isCorrect);
+        result.setTestTime(LocalDateTime.now());
+        return wordTestResultRepository.save(result);
     }
 
     private AddWordResult saveWord(InputWordData inputWordData, String ownerId) {

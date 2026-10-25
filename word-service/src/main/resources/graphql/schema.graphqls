@@ -28,6 +28,12 @@ type DeleteWordPayload {
     wordId: ID!
 }
 
+type WordTestResultPayload {
+    wordId: ID!
+    isCorrect: Boolean!
+    testTime: String!
+}
+
 input InputWordData {
     word: String!
     translation: String!
@@ -51,6 +57,7 @@ type Query {
 
 type Mutation {
     addWord(input: InputWordData!): AddWordResult!
+    testWord(wordId: ID!, translation: String!): WordTestResultPayload!
     setLearned(setLearnedInput: SetLearnedInput!): SetLearnedPayload!
     updateWord(input: UpdateWordInput!): UpdateWordPayload!
     deleteWord(wordId: ID!): DeleteWordPayload!
