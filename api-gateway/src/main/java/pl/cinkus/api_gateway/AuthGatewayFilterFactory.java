@@ -52,6 +52,11 @@ public class AuthGatewayFilterFactory extends AbstractGatewayFilterFactory<Objec
 
                         ServerHttpRequest request = exchange.getRequest()
                                 .mutate()
+                                //Remove potentially malicious headers
+                                .headers(headers -> {
+                                    headers.remove(ID_HEADER);
+                                    headers.remove(ROLE_HEADER);
+                                })
                                 .header(ID_HEADER, claims.getSubject())
                                 .header(ROLE_HEADER, claims.get(ROLE, String.class))
                                 .build();

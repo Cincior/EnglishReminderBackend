@@ -3,7 +3,7 @@ package pl.cinkus.IdentityService.exception;
 public enum ErrorCode {
     EMAIL_OR_NICKNAME_ALREADY_TAKEN,
     USER_NOT_FOUND,
-    INVALID_PASSWORD,
+    LOGIN_FAILED,
     INTERNAL_SERVER_ERROR,
     VALIDATION_ERROR,
     INVALID_REFRESH_TOKEN,

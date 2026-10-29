@@ -17,6 +17,7 @@ import pl.cinkus.backend.entity.WordData;
 import pl.cinkus.backend.entity.WordTestResult;
 import pl.cinkus.backend.repository.WordDataRepository;
 import pl.cinkus.backend.repository.WordTestResultRepository;
+import pl.cinkus.backend.validation.WordDataValidation;
 import lombok.extern.slf4j.Slf4j;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -31,10 +32,10 @@ public class WordDataService {
     private final WordTestResultRepository wordTestResultRepository;
     private final PredictionFeatureCalculator predictionFeatureCalculator;
     private final PredictClient predictClient;
+    private final WordDataValidation validation;
 
     public List<WordDataDTO> getUserWords(String ownerId) {
         UUID ownerIdParsed = parseUuid(ownerId, "ownerId");
-        List<WordDataDTO> wordDataDTOList = new ArrayList<>();
 
         List<WordData> wordDataList = wordDataRepository.findByOwnerId(ownerIdParsed);
         if (wordDataList.isEmpty()) {
@@ -48,7 +49,7 @@ public class WordDataService {
                         .toList();
         }
 
-        log.info("test: " + wordTestResults.toString());
+        log.info("test: " + wordTestResults);
         List<PredictRequestData> requestDataList =
                 predictionFeatureCalculator.preparePredictFeatures(wordDataList, wordTestResults);
         log.info("reqData: " + requestDataList.toString());
@@ -64,6 +65,7 @@ public class WordDataService {
                         PredictResponseData::wordId,
                         PredictResponseData::probabilityPercent
                 ));
+        log.info("resData: " + probabilityByWordId);
 
         return wordDataList.stream()
                 .map(word -> {
@@ -73,7 +75,10 @@ public class WordDataService {
                 .toList();
     }
 
+    @Transactional
     public AddWordResult addWord(InputWordData inputWordData, String ownerId) {
+        validation.validate(inputWordData.getWord(), inputWordData.getTranslation());
+
         if (!inputWordData.getForceDuplicate()) {
             return wordDataRepository.findFirstByOwnerIdAndWord(parseUuid(ownerId, "ownerId"), inputWordData.getWord())
                     .map(existingWord -> AddWordResult.newBuilder()
@@ -91,9 +96,7 @@ public class WordDataService {
         UUID parsedUserId = parseUuid(userId, "userId");
         UUID parsedWordId = parseUuid(wordId, "wordId");
 
-        if (translation == null || translation.isBlank()) {
-            throw new WordServiceException(ErrorCode.INVALID_IDENTIFIER, "translation cannot be empty");
-        }
+        validation.validateTranslation(translation);
 
         WordData wordData = wordDataRepository.findByOwnerIdAndId(parsedUserId, parsedWordId)
                 .orElseThrow(() -> new WordServiceException(
@@ -138,6 +141,8 @@ public class WordDataService {
 
     @Transactional
     public void updateWord(UpdateWordInput input, String ownerId) {
+        validation.validate(input.getWord(), input.getTranslation());
+
         WordData wordData = wordDataRepository.findByOwnerIdAndId(parseUuid(ownerId, "ownerId"), parseUuid(input.getWordId(), "wordId"))
                 .orElseThrow(() -> new WordServiceException(
                         ErrorCode.WORD_NOT_FOUND,
