@@ -84,6 +84,18 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  predict-service:
+    build: ./EnglishReminderPredictAPI
+    container_name: PredictServiceApi
+    environment:
+      - PREDICT_SERVICE_PORT=${PREDICT_SERVICE_PORT}
+    expose:
+      - "${PREDICT_SERVICE_PORT}"
+    ports:
+      - "${PREDICT_SERVICE_PORT}:${PREDICT_SERVICE_PORT}"
+    networks:
+      - app-network
+
   redis:
     image: redis
 #    ports:

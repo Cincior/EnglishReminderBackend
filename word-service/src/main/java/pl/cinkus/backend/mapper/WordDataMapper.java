@@ -5,13 +5,14 @@ import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.entity.WordData;
 
 public class WordDataMapper {
-    public static WordDataDTO toDTO(WordData wordData) {
+    public static WordDataDTO toDTO(WordData wordData, float memorizeChance) {
         return WordDataDTO.builder()
                 .id(wordData.getId().toString())
                 .word(wordData.getWord())
                 .translation(wordData.getTranslation())
                 .insertDateTime(wordData.getInsertDateTime())
                 .isLearned(wordData.isLearned())
+                .memorizeChance(memorizeChance)
                 .build();
     }
 }

@@ -15,6 +15,7 @@ import pl.cinkus.backend.codegen.types.SetLearnedPayload;
 import pl.cinkus.backend.codegen.types.UpdateWordPayload;
 import pl.cinkus.backend.codegen.types.DeleteWordPayload;
 import pl.cinkus.backend.codegen.types.UpdateWordInput;
+import pl.cinkus.backend.codegen.types.WordTestResultPayload;
 import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.service.WordDataService;
 
@@ -35,6 +36,20 @@ public class WordDataFetcher {
     @PreAuthorize("hasRole('USER')")
     public AddWordResult addWord(@Argument(name = "input") InputWordData inputWordData) {
         return wordDataService.addWord(inputWordData, getUserId());
+    }
+
+    @MutationMapping
+    @PreAuthorize("hasRole('USER')")
+    public WordTestResultPayload testWord(
+            @Argument String wordId,
+            @Argument String translation
+    ) {
+        var result = wordDataService.testWord(wordId, translation, getUserId());
+        return WordTestResultPayload.newBuilder()
+                .wordId(result.getWordId().toString())
+                .isCorrect(result.isCorrect())
+                .testTime(result.getTestTimeInMilis().toString())
+                .build();
     }
 
     @MutationMapping
