@@ -74,14 +74,14 @@ public class IdentityService {
 
     public LoginResult login(UserLoginData userLoginData) {
         User user = userRepository.findByEmail(userLoginData.getEmail())
-                .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "User with given email does not exists!"));
+                .orElseThrow(() -> new IdentityServiceException(ErrorCode.LOGIN_FAILED, "Login failed"));
 
         if(!user.isVerified()) {
             throw new IdentityServiceException(ErrorCode.UNVERIFIED_USER, "User is not verified with a registration code");
         }
 
         if (!passwordEncoder.matches(userLoginData.getPassword(), user.getPassword())) {
-            throw new IdentityServiceException(ErrorCode.INVALID_PASSWORD, "Invalid password!");
+            throw new IdentityServiceException(ErrorCode.LOGIN_FAILED, "Login failed");
         }
 
         String token = jwtService.generateToken(user.getId(), user.getRole());
@@ -95,6 +95,7 @@ public class IdentityService {
                 .build();
     }
 
+    @Transactional
     public LoginResult refreshToken(String userRefreshToken) {
         RefreshToken oldRefreshToken = refreshTokenRepository.findByRefreshToken(userRefreshToken)
                 .orElseThrow(() -> new IdentityServiceException(ErrorCode.INVALID_REFRESH_TOKEN, "Refresh token not found"));

@@ -30,20 +30,23 @@ class PredictionResponse(BaseModel):
 
 @app.post("/predict", response_model=list[PredictionResponse])
 def predict(data: list[PredictionRequest]) -> list[PredictionResponse]:
-    predictions_list = []
-    for word in data:
-        df = pd.DataFrame([item.model_dump() for item in data])
-        features_df = df[FEATURE_COLUMNS]
+    if not data:
+        return []
 
-        pred = int(model.predict(features_df)[0])
-        prob = float(model.predict_proba(features_df)[0][1])
+    df = pd.DataFrame([item.model_dump() for item in data])
+    features_df = df[FEATURE_COLUMNS]
+
+    preds = model.predict(features_df)
+    probs = model.predict_proba(features_df)[:, 1]
+
+    predictions_list = []
+    for word, pred, prob in zip(data, preds, probs):
         predictions_list.append(
             PredictionResponse(
                 word_id=word.word_id,
-                prediction=pred,
-                probability_percent=round(prob * 100, 2),
+                prediction=int(pred),
+                probability_percent=round(float(prob) * 100, 2),
             )
         )
-
 
     return predictions_list

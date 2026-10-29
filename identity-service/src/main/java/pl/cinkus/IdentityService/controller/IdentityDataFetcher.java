@@ -72,9 +72,9 @@ public class IdentityDataFetcher {
                 .build();
     }
 
-    @QueryMapping
-    public List<String> getAllUsers() {
-        //toDo check if authenticated and authorize only for admin
-        return identityService.getAllUsers();
-    }
+    // Admin panel shall be created and internal networking should be used to get that kind of sensitive data
+//    @QueryMapping
+//    public List<String> getAllUsers() {
+//        return identityService.getAllUsers();
+//    }
 }

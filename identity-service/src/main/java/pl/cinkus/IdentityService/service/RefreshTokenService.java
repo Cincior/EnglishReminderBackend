@@ -25,7 +25,7 @@ public class RefreshTokenService {
                 .refreshTokenId(refreshTokenId)
                 .ownerId(ownerId)
                 .refreshToken(refreshTokenId.toString())
-                .expirationDate(Date.from(Instant.now().plus(jwtProperties.getRefreshExpiration())))
+                .expirationDate(Instant.now().plus(jwtProperties.getRefreshExpiration()))
                 .build();
 
         refreshTokenRepository.save(refreshToken);
@@ -33,7 +33,7 @@ public class RefreshTokenService {
     }
 
     public void verifyExpiration(RefreshToken refreshToken) {
-        if(refreshToken.getExpirationDate().before(Date.from(Instant.now()))) {
+        if(refreshToken.getExpirationDate().isBefore(Instant.now())) {
             refreshTokenRepository.delete(refreshToken);
             throw new IdentityServiceException(ErrorCode.REFRESH_TOKEN_EXPIRED, "Refresh token has expired");
         }

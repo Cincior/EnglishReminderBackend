@@ -2,24 +2,23 @@ package pl.cinkus.IdentityService.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.Table;
+import lombok.*;
 
 
-@Data
+@Getter
+@Setter
 @Entity
 @Builder
-@RequiredArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "reset_password_requests")
 public class ResetPasswordRequest {
     @Id
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, length = 254)
     private String email;
 
-    @Column(unique = true)
+    @Column(name = "reset_code", nullable = false, length = 6)
     private String resetCode;
 }
