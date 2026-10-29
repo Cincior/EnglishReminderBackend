@@ -1,26 +1,45 @@
 package pl.cinkus.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(
+        name = "word_data",
+        indexes = {
+                @Index(name = "idx_word_data_owner_id", columnList = "owner_id"),
+                @Index(name = "idx_word_data_owner_word", columnList = "owner_id, word")
+        }
+)
 public class WordData {
     @Id
+    @Column(nullable = false, updatable = false)
     private UUID id;
+
+    @Column(name = "owner_id", nullable = false, updatable = false)
     private UUID ownerId;
+
+    @Column(nullable = false, length = 200)
     private String word;
+
+    @Column(nullable = false, length = 200)
     private String translation;
-    private LocalDateTime insertDateTime;
-    private boolean isLearned;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant insertDateTime;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isLearned = false;
 }
