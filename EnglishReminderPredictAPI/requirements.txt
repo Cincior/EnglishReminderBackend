@@ -1,2 +1,6 @@
 fastapi
 uvicorn[standard]
+joblib
+pandas
+pydantic
+scikit-learn

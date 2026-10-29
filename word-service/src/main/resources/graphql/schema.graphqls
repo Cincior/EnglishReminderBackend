@@ -4,6 +4,7 @@ type WordData {
     translation: String!
     insertDateTime: String!
     isLearned: Boolean!
+    memorizeChance: Float!
 }
 
 type AddWordResult {

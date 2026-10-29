@@ -48,7 +48,7 @@ public class WordDataFetcher {
         return WordTestResultPayload.newBuilder()
                 .wordId(result.getWordId().toString())
                 .isCorrect(result.isCorrect())
-                .testTime(result.getTestTime().toString())
+                .testTime(result.getTestTimeInMilis().toString())
                 .build();
     }
 

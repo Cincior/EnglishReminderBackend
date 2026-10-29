@@ -17,4 +17,5 @@ public class WordDataDTO {
     private String translation;
     private LocalDateTime insertDateTime;
     private boolean isLearned;
+    private float memorizeChance;
 }

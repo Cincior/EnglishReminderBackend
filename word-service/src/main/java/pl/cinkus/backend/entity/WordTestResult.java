@@ -17,5 +17,5 @@ public class WordTestResult {
     private UUID wordId;
     private UUID userId;
     private boolean isCorrect;
-    private LocalDateTime testTime;
+    private Long testTimeInMilis;
 }

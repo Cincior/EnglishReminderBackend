@@ -1,16 +1,24 @@
-package pl.cinkus.backend.config;
+    package pl.cinkus.backend.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestClient;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.http.client.JdkClientHttpRequestFactory;
+    import org.springframework.web.client.RestClient;
 
-@Configuration
-public class AppConfig {
+    import java.net.http.HttpClient;
 
-    @Bean
-    public RestClient PredictApiClient() {
-        return RestClient.builder()
-                .baseUrl("http://predict-service:8000")
-                .build();
+    @Configuration
+    public class AppConfig {
+
+        @Bean
+        public RestClient predictApiClient() {
+            HttpClient httpClient = HttpClient.newBuilder()
+                    .version(HttpClient.Version.HTTP_1_1)
+                    .build();
+
+            return RestClient.builder()
+                    .baseUrl("http://predict-service:8000")
+                    .requestFactory(new JdkClientHttpRequestFactory(httpClient))
+                    .build();
+        }
     }
-}

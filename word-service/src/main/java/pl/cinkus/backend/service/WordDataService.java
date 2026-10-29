@@ -3,10 +3,12 @@ package pl.cinkus.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
+import pl.cinkus.backend.client.PredictClient;
 import pl.cinkus.backend.codegen.types.AddWordResult;
 import pl.cinkus.backend.codegen.types.InputWordData;
 import pl.cinkus.backend.codegen.types.UpdateWordInput;
+import pl.cinkus.backend.dto.PredictRequestData;
+import pl.cinkus.backend.dto.PredictResponseData;
 import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.exception.ErrorCode;
 import pl.cinkus.backend.exception.WordServiceException;
@@ -15,24 +17,60 @@ import pl.cinkus.backend.entity.WordData;
 import pl.cinkus.backend.entity.WordTestResult;
 import pl.cinkus.backend.repository.WordDataRepository;
 import pl.cinkus.backend.repository.WordTestResultRepository;
-
+import lombok.extern.slf4j.Slf4j;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class WordDataService {
     private final WordDataRepository wordDataRepository;
     private final WordTestResultRepository wordTestResultRepository;
-    private final RestClient restClient;
+    private final PredictionFeatureCalculator predictionFeatureCalculator;
+    private final PredictClient predictClient;
 
     public List<WordDataDTO> getUserWords(String ownerId) {
-        List<WordData> wordDataList = wordDataRepository.findByOwnerId(parseUuid(ownerId, "ownerId"));
+        UUID ownerIdParsed = parseUuid(ownerId, "ownerId");
+        List<WordDataDTO> wordDataDTOList = new ArrayList<>();
 
-        //Todo get predictions for learning advancement for each words.
-        System.out.println(restClient.get().uri("/predict").retrieve().body(String.class));
-        return wordDataList.stream().map(WordDataMapper::toDTO).toList();
+        List<WordData> wordDataList = wordDataRepository.findByOwnerId(ownerIdParsed);
+        if (wordDataList.isEmpty()) {
+            return List.of();
+        }
+
+        List<WordTestResult> wordTestResults = wordTestResultRepository.findAllByUserId(ownerIdParsed);
+        if (wordTestResults.isEmpty()) {
+            return wordDataList.stream()
+                    .map(word -> WordDataMapper.toDTO(word, -1))
+                        .toList();
+        }
+
+        log.info("test: " + wordTestResults.toString());
+        List<PredictRequestData> requestDataList =
+                predictionFeatureCalculator.preparePredictFeatures(wordDataList, wordTestResults);
+        log.info("reqData: " + requestDataList.toString());
+        if (requestDataList.isEmpty()) {
+            return wordDataList.stream()
+                    .map(word -> WordDataMapper.toDTO(word, -1))
+                    .toList();
+        }
+
+        Map<String, Float> probabilityByWordId = predictClient.predict(requestDataList)
+                .stream()
+                .collect(Collectors.toMap(
+                        PredictResponseData::wordId,
+                        PredictResponseData::probabilityPercent
+                ));
+
+        return wordDataList.stream()
+                .map(word -> {
+                    float probability = probabilityByWordId.getOrDefault(word.getId().toString(), -1.0f);
+                    return WordDataMapper.toDTO(word, probability);
+                })
+                .toList();
     }
 
     public AddWordResult addWord(InputWordData inputWordData, String ownerId) {
@@ -69,7 +107,7 @@ public class WordDataService {
         result.setWordId(parsedWordId);
         result.setUserId(parsedUserId);
         result.setCorrect(isCorrect);
-        result.setTestTime(LocalDateTime.now());
+        result.setTestTimeInMilis(Instant.now().toEpochMilli());
         return wordTestResultRepository.save(result);
     }
 
