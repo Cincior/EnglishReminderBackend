@@ -120,7 +120,6 @@ public class WordDataService {
                 .ownerId(parseUuid(ownerId, "ownerId"))
                 .word(inputWordData.getWord())
                 .translation(inputWordData.getTranslation())
-                .insertDateTime(LocalDateTime.now())
                 .isLearned(false)
                 .build();
 
