@@ -1,6 +1,7 @@
 package pl.cinkus.backend.mapper;
 
 
+import pl.cinkus.backend.codegen.types.Category;
 import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.entity.WordData;
 
@@ -11,7 +12,7 @@ public class WordDataMapper {
                 .word(wordData.getWord())
                 .translation(wordData.getTranslation())
                 .insertDateTime(wordData.getInsertDateTime())
-                .isLearned(wordData.isLearned())
+                .category(wordData.getCategory())
                 .memorizeChance(memorizeChance)
                 .build();
     }

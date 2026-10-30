@@ -8,14 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import pl.cinkus.backend.codegen.types.AddWordResult;
-import pl.cinkus.backend.codegen.types.InputWordData;
-import pl.cinkus.backend.codegen.types.SetLearnedInput;
-import pl.cinkus.backend.codegen.types.SetLearnedPayload;
-import pl.cinkus.backend.codegen.types.UpdateWordPayload;
-import pl.cinkus.backend.codegen.types.DeleteWordPayload;
-import pl.cinkus.backend.codegen.types.UpdateWordInput;
-import pl.cinkus.backend.codegen.types.WordTestResultPayload;
+import pl.cinkus.backend.codegen.types.*;
 import pl.cinkus.backend.dto.WordDataDTO;
 import pl.cinkus.backend.service.WordDataService;
 
@@ -54,11 +47,11 @@ public class WordDataFetcher {
 
     @MutationMapping
     @PreAuthorize("hasRole('USER')")
-    public SetLearnedPayload setLearned(@Argument(name = "setLearnedInput") SetLearnedInput setLearnedInput) {
-        wordDataService.setLearned(setLearnedInput.getWordId(), getUserId(), setLearnedInput.getIsLearned());
-        return SetLearnedPayload.newBuilder()
-                .wordId(setLearnedInput.getWordId())
-                .isLearned(setLearnedInput.getIsLearned())
+    public SetCategoryPayload setCategory(@Argument(name = "setCategoryInput") SetCategoryInput setCategoryInput) {
+        wordDataService.setCategory(setCategoryInput.getWordId(), getUserId(), setCategoryInput.getCategory());
+        return SetCategoryPayload.newBuilder()
+                .wordId(setCategoryInput.getWordId())
+                .category(setCategoryInput.getCategory())
                 .build();
     }
 

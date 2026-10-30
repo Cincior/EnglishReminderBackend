@@ -3,6 +3,7 @@ package pl.cinkus.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import pl.cinkus.backend.codegen.types.Category;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -40,6 +41,6 @@ public class WordData {
     private Instant insertDateTime;
 
     @Builder.Default
-    @Column(nullable = false)
-    private boolean isLearned = false;
+    @Column
+    private Category category = Category.NOT_LEARNED;
 }
