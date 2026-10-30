@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pl.cinkus.backend.codegen.types.Category;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -17,6 +18,6 @@ public class WordDataDTO {
     private String word;
     private String translation;
     private Instant insertDateTime;
-    private boolean isLearned;
+    private Category category;
     private float memorizeChance;
 }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.cinkus.backend.client.PredictClient;
 import pl.cinkus.backend.codegen.types.AddWordResult;
+import pl.cinkus.backend.codegen.types.Category;
 import pl.cinkus.backend.codegen.types.InputWordData;
 import pl.cinkus.backend.codegen.types.UpdateWordInput;
 import pl.cinkus.backend.dto.PredictRequestData;
@@ -120,7 +121,7 @@ public class WordDataService {
                 .ownerId(parseUuid(ownerId, "ownerId"))
                 .word(inputWordData.getWord())
                 .translation(inputWordData.getTranslation())
-                .isLearned(false)
+                .category(Category.NOT_LEARNED)
                 .build();
 
         WordData savedWord = wordDataRepository.save(word);
@@ -131,11 +132,14 @@ public class WordDataService {
     }
 
     @Transactional
-    public void setLearned(String wordId, String userId, boolean isLearned) {
+    public void setCategory(String wordId, String userId, Category category) {
+        if (category == null) {
+            throw new WordServiceException(ErrorCode.CATEGORY_NOT_FOUND, "No such category!");
+        }
         WordData wordData = wordDataRepository.findByOwnerIdAndId(parseUuid(userId, "userId"), parseUuid(wordId, "wordId"))
                 .orElseThrow(() -> new WordServiceException(ErrorCode.WORD_NOT_FOUND, "We did not find your word!"));
 
-        wordData.setLearned(isLearned);
+        wordData.setCategory(category);
     }
 
     @Transactional

@@ -3,8 +3,14 @@ type WordData {
     word: String!
     translation: String!
     insertDateTime: String!
-    isLearned: Boolean!
     memorizeChance: Float!
+}
+
+enum Category {
+    LEARNED
+    NOT_LEARNED
+    LEARN_LATER
+    LEARN_NOW
 }
 
 type AddWordResult {
@@ -13,9 +19,9 @@ type AddWordResult {
     existingWordId: ID
 }
 
-type SetLearnedPayload {
+type SetCategoryPayload {
     wordId: ID!
-    isLearned: Boolean!
+    category: Category!
 }
 
 type UpdateWordPayload {
@@ -41,9 +47,9 @@ input InputWordData {
     forceDuplicate: Boolean!
 }
 
-input SetLearnedInput {
+input SetCategoryInput {
     wordId: ID!
-    isLearned: Boolean!
+    category: Category!
 }
 
 input UpdateWordInput {
@@ -59,7 +65,7 @@ type Query {
 type Mutation {
     addWord(input: InputWordData!): AddWordResult!
     testWord(wordId: ID!, translation: String!): WordTestResultPayload!
-    setLearned(setLearnedInput: SetLearnedInput!): SetLearnedPayload!
+    setCategory(setCategoryInput: SetCategoryInput!): SetCategoryPayload!
     updateWord(input: UpdateWordInput!): UpdateWordPayload!
     deleteWord(wordId: ID!): DeleteWordPayload!
 }
