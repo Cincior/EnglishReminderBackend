@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.cinkus.backend.client.PredictClient;
-import pl.cinkus.backend.codegen.types.AddWordResult;
-import pl.cinkus.backend.codegen.types.Category;
-import pl.cinkus.backend.codegen.types.InputWordData;
-import pl.cinkus.backend.codegen.types.UpdateWordInput;
+import pl.cinkus.backend.client.RabbitMqMessageSender;
+import pl.cinkus.backend.codegen.types.*;
 import pl.cinkus.backend.dto.PredictRequestData;
 import pl.cinkus.backend.dto.PredictResponseData;
 import pl.cinkus.backend.dto.WordDataDTO;
@@ -20,8 +18,13 @@ import pl.cinkus.backend.repository.WordDataRepository;
 import pl.cinkus.backend.repository.WordTestResultRepository;
 import pl.cinkus.backend.validation.WordDataValidation;
 import lombok.extern.slf4j.Slf4j;
+import pl.cinkus.messages.SendMobileNotificationMessage;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,6 +37,7 @@ public class WordDataService {
     private final PredictionFeatureCalculator predictionFeatureCalculator;
     private final PredictClient predictClient;
     private final WordDataValidation validation;
+    private final RabbitMqMessageSender rabbitMqMessageSender;
 
     public List<WordDataDTO> getUserWords(String ownerId) {
         UUID ownerIdParsed = parseUuid(ownerId, "ownerId");
@@ -164,6 +168,26 @@ public class WordDataService {
                         "We did not find your word!"
                 ));
         wordDataRepository.delete(wordData);
+    }
+
+    public void scheduleNotification(ScheduleNotificationInput notificationInput, String userId) {
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(parseUuid(userId, "ownerId"), parseUuid(notificationInput.getWordId(), "wordId"))
+                .orElseThrow(() -> new WordServiceException(ErrorCode.WORD_NOT_FOUND, "We did not find your word!"));
+
+        try {
+            Instant notificationTime = Instant.parse(notificationInput.getScheduleTime());
+            if (notificationTime.isBefore(Instant.now()) || notificationTime.isAfter(Instant.now().plus(365, ChronoUnit.DAYS))) {
+                throw new WordServiceException(ErrorCode.WRONG_TIME, "Time is not valid");
+            }
+            rabbitMqMessageSender.sendMessage(SendMobileNotificationMessage.builder()
+                            .word(wordData.getWord())
+                            .translation(wordData.getTranslation())
+                            .dateTime(notificationTime.toString())
+                    .build());
+        } catch (DateTimeParseException e) {
+            throw new WordServiceException(ErrorCode.WRONG_TIME_FORMAT, "We could not parse a time");
+        }
+
     }
 
     private UUID parseUuid(String value, String fieldName) {

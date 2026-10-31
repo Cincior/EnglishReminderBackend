@@ -5,6 +5,11 @@ spring:
         enabled: true
   application:
     name: word-service
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_NODE_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
   datasource:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
@@ -23,5 +28,9 @@ spring:
       path: /h2-console
       settings:
         web-allow-others: true
+app:
+  rabbitmq:
+    exchange: ${RABBITMQ_NOTIFICATION_EXCHANGE}
+    mobileRoutingKey: ${RABBITMQ_NOTIFICATION_MOBILE_ROUTING_KEY}
 server:
   port: ${WORD_SERVICE_PORT:777}

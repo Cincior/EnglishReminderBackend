@@ -11,7 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @NoArgsConstructor
 public class RabbitMqProperties {
-    private String queue;
+    private String emailQueue;
+    private String mobileQueue;
     private String exchange;
-    private String routingKey;
+    private String emailRoutingKey;
+    private String mobileRoutingKey;
 }

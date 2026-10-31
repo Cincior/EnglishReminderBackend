@@ -76,6 +76,14 @@ public class WordDataFetcher {
                 .build();
     }
 
+    @MutationMapping
+    public ScheduleNotificationPayload scheduleNotification(@Argument(name = "input") ScheduleNotificationInput notificationInput) {
+        wordDataService.scheduleNotification(notificationInput, getUserId());
+        return ScheduleNotificationPayload.newBuilder()
+                .wordId(notificationInput.getWordId())
+                .build();
+    }
+
     private String getUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();

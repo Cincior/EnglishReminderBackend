@@ -19,7 +19,7 @@ application:
       refreshExpiration: ${JWT_REFRESH_EXPIRATION_TIME:3d}
   rabbitmq:
     exchange: ${RABBITMQ_NOTIFICATION_EXCHANGE}
-    routing-key: ${RABBITMQ_REGISTRATION_EMAIL_ROUTING_KEY}
+    emailRoutingKey: ${RABBITMQ_REGISTRATION_EMAIL_ROUTING_KEY}
   admin:
 #    - ADMIN_SEED_ENABLED=${ADMIN_SEED_ENABLED}
     email: ${ADMIN_SEED_EMAIL}

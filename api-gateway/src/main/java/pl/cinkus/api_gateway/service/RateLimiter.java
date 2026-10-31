@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RateLimiter {
     private final ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
-    private static final Integer TRIES_LIMIT = 30;
+    public static final Integer TRIES_LIMIT = 30;
     private static final Integer TIME_WINDOW_SECONDS = 60;
     private static final String KEY_PREFIX = "rate_limit:";
     private static final RedisScript<Long> RATE_LIMIT_SCRIPT =
