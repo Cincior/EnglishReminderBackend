@@ -13,6 +13,6 @@ public class RabbitMqMessageSender {
     private final RabbitMqProperties properites;
 
     public void sendMessage(SendEmailWithCodeMessage message) {
-        rabbitTemplate.convertAndSend(properites.getExchange(), properites.getRoutingKey(), message);
+        rabbitTemplate.convertAndSend(properites.getExchange(), properites.getEmailRoutingKey(), message);
     }
 }

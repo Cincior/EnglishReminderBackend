@@ -4,24 +4,31 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.cinkus.backend.client.PredictClient;
-import pl.cinkus.backend.codegen.types.AddWordResult;
-import pl.cinkus.backend.codegen.types.Category;
-import pl.cinkus.backend.codegen.types.InputWordData;
-import pl.cinkus.backend.codegen.types.UpdateWordInput;
+import pl.cinkus.backend.client.RabbitMqMessageSender;
+import pl.cinkus.backend.codegen.types.*;
 import pl.cinkus.backend.dto.PredictRequestData;
 import pl.cinkus.backend.dto.PredictResponseData;
 import pl.cinkus.backend.dto.WordDataDTO;
+import pl.cinkus.backend.entity.Notification;
+import pl.cinkus.backend.entity.NotificationOutbox;
 import pl.cinkus.backend.exception.ErrorCode;
 import pl.cinkus.backend.exception.WordServiceException;
 import pl.cinkus.backend.mapper.WordDataMapper;
 import pl.cinkus.backend.entity.WordData;
 import pl.cinkus.backend.entity.WordTestResult;
+import pl.cinkus.backend.repository.NotificationOutboxRepository;
+import pl.cinkus.backend.repository.NotificationRepository;
 import pl.cinkus.backend.repository.WordDataRepository;
 import pl.cinkus.backend.repository.WordTestResultRepository;
 import pl.cinkus.backend.validation.WordDataValidation;
 import lombok.extern.slf4j.Slf4j;
+import pl.cinkus.messages.SendMobileNotificationMessage;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,16 +41,17 @@ public class WordDataService {
     private final PredictionFeatureCalculator predictionFeatureCalculator;
     private final PredictClient predictClient;
     private final WordDataValidation validation;
+    private final RabbitMqMessageSender rabbitMqMessageSender;
+    private final NotificationRepository notificationRepository;
+    private final NotificationOutboxRepository notificationOutboxRepository;
 
-    public List<WordDataDTO> getUserWords(String ownerId) {
-        UUID ownerIdParsed = parseUuid(ownerId, "ownerId");
-
-        List<WordData> wordDataList = wordDataRepository.findByOwnerId(ownerIdParsed);
+    public List<WordDataDTO> getUserWords(UUID ownerId) {
+        List<WordData> wordDataList = wordDataRepository.findByOwnerId(ownerId);
         if (wordDataList.isEmpty()) {
             return List.of();
         }
 
-        List<WordTestResult> wordTestResults = wordTestResultRepository.findAllByUserId(ownerIdParsed);
+        List<WordTestResult> wordTestResults = wordTestResultRepository.findAllByUserId(ownerId);
         if (wordTestResults.isEmpty()) {
             return wordDataList.stream()
                     .map(word -> WordDataMapper.toDTO(word, -1))
@@ -77,11 +85,11 @@ public class WordDataService {
     }
 
     @Transactional
-    public AddWordResult addWord(InputWordData inputWordData, String ownerId) {
+    public AddWordResult addWord(InputWordData inputWordData, UUID ownerId) {
         validation.validate(inputWordData.getWord(), inputWordData.getTranslation());
 
         if (!inputWordData.getForceDuplicate()) {
-            return wordDataRepository.findFirstByOwnerIdAndWord(parseUuid(ownerId, "ownerId"), inputWordData.getWord())
+            return wordDataRepository.findFirstByOwnerIdAndWord(ownerId, inputWordData.getWord())
                     .map(existingWord -> AddWordResult.newBuilder()
                             .created(false)
                             .existingWordId(existingWord.getId().toString())
@@ -93,13 +101,10 @@ public class WordDataService {
     }
 
     @Transactional
-    public WordTestResult testWord(String wordId, String translation, String userId) {
-        UUID parsedUserId = parseUuid(userId, "userId");
-        UUID parsedWordId = parseUuid(wordId, "wordId");
-
+    public WordTestResult testWord(UUID wordId, String translation, UUID userId) {
         validation.validateTranslation(translation);
 
-        WordData wordData = wordDataRepository.findByOwnerIdAndId(parsedUserId, parsedWordId)
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(userId, wordId)
                 .orElseThrow(() -> new WordServiceException(
                         ErrorCode.WORD_NOT_FOUND,
                         "We did not find your word!"
@@ -108,17 +113,17 @@ public class WordDataService {
         boolean isCorrect = wordData.getTranslation().trim().equalsIgnoreCase(translation.trim());
         WordTestResult result = new WordTestResult();
         result.setTestId(UUID.randomUUID());
-        result.setWordId(parsedWordId);
-        result.setUserId(parsedUserId);
+        result.setWordId(wordId);
+        result.setUserId(userId);
         result.setCorrect(isCorrect);
         result.setTestTimeInMilis(Instant.now().toEpochMilli());
         return wordTestResultRepository.save(result);
     }
 
-    private AddWordResult saveWord(InputWordData inputWordData, String ownerId) {
+    private AddWordResult saveWord(InputWordData inputWordData, UUID ownerId) {
         WordData word = WordData.builder()
                 .id(UUID.randomUUID())
-                .ownerId(parseUuid(ownerId, "ownerId"))
+                .ownerId(ownerId)
                 .word(inputWordData.getWord())
                 .translation(inputWordData.getTranslation())
                 .category(Category.NOT_LEARNED)
@@ -132,21 +137,21 @@ public class WordDataService {
     }
 
     @Transactional
-    public void setCategory(String wordId, String userId, Category category) {
+    public void setCategory(UUID wordId, UUID userId, Category category) {
         if (category == null) {
             throw new WordServiceException(ErrorCode.CATEGORY_NOT_FOUND, "No such category!");
         }
-        WordData wordData = wordDataRepository.findByOwnerIdAndId(parseUuid(userId, "userId"), parseUuid(wordId, "wordId"))
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(userId, wordId)
                 .orElseThrow(() -> new WordServiceException(ErrorCode.WORD_NOT_FOUND, "We did not find your word!"));
 
         wordData.setCategory(category);
     }
 
     @Transactional
-    public void updateWord(UpdateWordInput input, String ownerId) {
+    public void updateWord(UpdateWordInput input, UUID ownerId, UUID wordId) {
         validation.validate(input.getWord(), input.getTranslation());
 
-        WordData wordData = wordDataRepository.findByOwnerIdAndId(parseUuid(ownerId, "ownerId"), parseUuid(input.getWordId(), "wordId"))
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(ownerId, wordId)
                 .orElseThrow(() -> new WordServiceException(
                         ErrorCode.WORD_NOT_FOUND,
                         "We did not find your word!"
@@ -157,8 +162,8 @@ public class WordDataService {
     }
 
     @Transactional
-    public void deleteWord(String wordId, String ownerId) {
-        WordData wordData = wordDataRepository.findByOwnerIdAndId(parseUuid(ownerId, "ownerId"), parseUuid(wordId, "wordId"))
+    public void deleteWord(UUID wordId, UUID ownerId) {
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(ownerId, wordId)
                 .orElseThrow(() -> new WordServiceException(
                         ErrorCode.WORD_NOT_FOUND,
                         "We did not find your word!"
@@ -166,21 +171,27 @@ public class WordDataService {
         wordDataRepository.delete(wordData);
     }
 
-    private UUID parseUuid(String value, String fieldName) {
-        if (value == null || value.isBlank()) {
-            throw new WordServiceException(
-                    ErrorCode.INVALID_IDENTIFIER,
-                    fieldName + " cannot be empty"
-            );
-        }
+    @Transactional
+    public void scheduleNotification(Instant scheduleTime, UUID userId, UUID wordId) {
+        WordData wordData = wordDataRepository.findByOwnerIdAndId(userId, wordId)
+                .orElseThrow(() -> new WordServiceException(ErrorCode.WORD_NOT_FOUND, "We did not find your word!"));
 
-        try {
-            return UUID.fromString(value);
-        } catch (IllegalArgumentException exception) {
-            throw new WordServiceException(
-                    ErrorCode.INVALID_IDENTIFIER,
-                    fieldName + " has an invalid format"
-            );
-        }
+        Notification notification = Notification.builder()
+                .fcmToken("FCM_TOKEN")
+                .word(wordData.getWord())
+                .translation(wordData.getTranslation())
+                .dateTime(scheduleTime.toString())
+                .build();
+        notificationRepository.save(notification);
+        notificationOutboxRepository.save(
+                NotificationOutbox.builder()
+                        .notification(notification)
+                        .isPublished(false)
+                        .isSent(false)
+                        .isPublishing(false)
+                        .build()
+        );
+
     }
+
 }

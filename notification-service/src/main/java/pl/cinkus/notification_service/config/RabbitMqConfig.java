@@ -11,6 +11,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,8 +22,13 @@ public class RabbitMqConfig {
     private final RabbitMqProperties properties;
 
     @Bean
-    public Queue queue() {
-        return new Queue(properties.getQueue(), true);
+    public Queue emailQueue() {
+        return new Queue(properties.getEmailQueue(), true);
+    }
+
+    @Bean
+    public Queue mobileQueue() {
+        return new Queue(properties.getMobileQueue(), true);
     }
 
     @Bean
@@ -31,8 +37,13 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(properties.getRoutingKey());
+    public Binding emailbinding(@Qualifier(value = "emailQueue") Queue queue, TopicExchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange).with(properties.getEmailRoutingKey());
+    }
+
+    @Bean
+    public Binding mobilebinding(@Qualifier(value = "mobileQueue") Queue queue, TopicExchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange).with(properties.getMobileRoutingKey());
     }
 
     @Bean

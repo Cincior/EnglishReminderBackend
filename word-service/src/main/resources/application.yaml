@@ -5,23 +5,30 @@ spring:
         enabled: true
   application:
     name: word-service
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_NODE_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${WORD_DB_HOST}:${WORD_DB_PORT}/${WORD_DB_NAME}
+    driver-class-name: org.postgresql.Driver
+    username: ${WORD_DB_USER}
+    password: ${WORD_DB_PASSWORD}
 
   jpa:
     hibernate:
       ddl-auto: create
     show-sql: true
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
+app:
+  rabbitmq:
+    exchange: ${RABBITMQ_NOTIFICATION_EXCHANGE}
+    mobileRoutingKey: ${RABBITMQ_NOTIFICATION_MOBILE_ROUTING_KEY}
 server:
   port: ${WORD_SERVICE_PORT:777}

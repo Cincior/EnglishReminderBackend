@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @NoArgsConstructor
 public class RabbitMqProperties {
 
-    private String queue;
+    private String emailQueue;
     private String exchange;
-    private String routingKey;
+    private String emailRoutingKey;
 }

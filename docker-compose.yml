@@ -4,10 +4,25 @@ services:
     container_name: WordService
     environment:
       - WORD_SERVICE_PORT=${WORD_SERVICE_PORT}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - WORD_DB_HOST=${WORD_DB_HOST}
+      - WORD_DB_PORT=${WORD_DB_PORT}
+      - WORD_DB_NAME=${WORD_DB_NAME}
+      - WORD_DB_USER=${WORD_DB_USER}
+      - WORD_DB_PASSWORD=${WORD_DB_PASSWORD}
+      - RABBITMQ_NODE_PORT=${RABBITMQ_NODE_PORT}
+      - RABBITMQ_MANAGEMENT_PORT=${RABBITMQ_MANAGEMENT_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_NOTIFICATION_EXCHANGE=${RABBITMQ_NOTIFICATION_EXCHANGE}
+      - RABBITMQ_NOTIFICATION_MOBILE_ROUTING_KEY=${RABBITMQ_NOTIFICATION_MOBILE_ROUTING_KEY}
 #    ports:
 #      - "${WORD_SERVICE_PORT}:${WORD_SERVICE_PORT}"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -51,12 +66,19 @@ services:
       - ADMIN_SEED_NAME=${ADMIN_SEED_NAME}
       - ADMIN_SEED_SURNAME=${ADMIN_SEED_SURNAME}
       - ADMIN_SEED_ROLE=${ADMIN_SEED_ROLE}
+      - IDENTITY_DB_HOST=${IDENTITY_DB_HOST}
+      - IDENTITY_DB_PORT=${IDENTITY_DB_PORT}
+      - IDENTITY_DB_NAME=${IDENTITY_DB_NAME}
+      - IDENTITY_DB_USER=${IDENTITY_DB_USER}
+      - IDENTITY_DB_PASSWORD=${IDENTITY_DB_PASSWORD}
     ports:
       - "${IDENTITY_SERVICE_PORT}:${IDENTITY_SERVICE_PORT}"
     networks:
       - app-network
     depends_on:
       rabbitmq:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
 
   notification-service:
@@ -70,14 +92,20 @@ services:
       - RABBITMQ_HOST=${RABBITMQ_HOST}
       - RABBITMQ_NOTIFICATION_EXCHANGE=${RABBITMQ_NOTIFICATION_EXCHANGE}
       - RABBITMQ_REGISTRATION_EMAIL_ROUTING_KEY=${RABBITMQ_REGISTRATION_EMAIL_ROUTING_KEY}
+      - RABBITMQ_NOTIFICATION_MOBILE_ROUTING_KEY=${RABBITMQ_NOTIFICATION_MOBILE_ROUTING_KEY}
       - RABBITMQ_VERIFICATION_CODE_QUEUE=${RABBITMQ_VERIFICATION_CODE_QUEUE}
+      - RABBITMQ_MOBILE_NOTIFICATION_QUEUE=${RABBITMQ_MOBILE_NOTIFICATION_QUEUE}
       - MAIL_HOST=${MAIL_HOST}
       - MAIL_PORT=${MAIL_PORT}
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_FROM=${MAIL_FROM}
+      - MAIL_PROPERTIES_SMTP_AUTH=${MAIL_PROPERTIES_SMTP_AUTH}
+      - FIREBASE_CREDENTIALS_PATH=/run/secrets/firebase-key.json
 #    ports:
 #      - "${NOTIFICATION_SERVICE_PORT}:${NOTIFICATION_SERVICE_PORT}"
+    volumes:
+      - ./secrets/englishreminder-admin-key.json:/run/secrets/firebase-key.json:ro
     networks:
       - app-network
     depends_on:
@@ -118,6 +146,28 @@ services:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
       retries: 12
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: Postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${WORD_DB_EXTERNAL_PORT}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${WORD_DB_USER} -d ${WORD_DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
 
 networks:
   app-network:
