@@ -30,6 +30,7 @@
         <graphqlcodegen.version>1.61.5</graphqlcodegen.version>
         <build-helper.version>3.5.0</build-helper.version>
         <annotations.version>26.0.2</annotations.version>
+        <com.google.firebase.version>9.7.0</com.google.firebase.version>
     </properties>
 
     <modules>
@@ -88,6 +89,12 @@
                 <groupId>pl.cinkus</groupId>
                 <artifactId>common-dto</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.firebase</groupId>
+                <artifactId>firebase-admin</artifactId>
+                <version>${com.google.firebase.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -24,5 +24,6 @@ public class RabbitMqConsumer {
     @RabbitListener(queues = "${app.rabbitmq.mobileQueue}")
     public void consumeMessage(SendMobileNotificationMessage message) {
         log.info("Tutaj mobile: " + message);
+        mobileNotificationService.sendNotification(message);
     }
 }

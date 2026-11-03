@@ -1,6 +1,7 @@
 package pl.cinkus.backend.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -31,6 +32,16 @@ public class RabbitMqConfig {
     ) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(messageConverter);
+
+        rabbitTemplate.setBeforePublishPostProcessors(message -> {
+
+            message.getMessageProperties().setDeliveryMode(
+                    MessageDeliveryMode.PERSISTENT
+            );
+
+            return message;
+        });
+
         return rabbitTemplate;
     }
 }

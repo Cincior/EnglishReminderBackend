@@ -15,6 +15,10 @@ spring:
           initial-interval: 2000
           multiplier: 2
           max-interval: 10000
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
