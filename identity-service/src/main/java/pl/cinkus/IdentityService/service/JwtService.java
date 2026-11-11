@@ -20,12 +20,13 @@ import java.util.UUID;
 public class JwtService {
 	private final JwtProperties jwtProperties;
 
-	public String generateToken(UUID userID, UserRole userRole) {
+	public String generateToken(UUID userID, UserRole userRole, String userNickname) {
         return Jwts.builder()
                 .subject(userID.toString())
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(Instant.now().plus(jwtProperties.getExpiration())))
                 .claim("role", userRole)
+				.claim("nickname", userNickname)
                 .signWith(getSecretKey())
                 .compact();
 	}

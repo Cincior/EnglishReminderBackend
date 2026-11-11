@@ -74,7 +74,7 @@ public class IdentityService {
 
     public LoginResult login(UserLoginData userLoginData) {
         User user = userRepository.findByEmail(userLoginData.getEmail())
-                .orElseThrow(() -> new IdentityServiceException(ErrorCode.LOGIN_FAILED, "Login failed"));
+                .orElseThrow(() -> new IdentityServiceException(ErrorCode.USER_NOT_FOUND, "Login failed"));
 
         if(!user.isVerified()) {
             throw new IdentityServiceException(ErrorCode.UNVERIFIED_USER, "User is not verified with a registration code");
@@ -84,7 +84,7 @@ public class IdentityService {
             throw new IdentityServiceException(ErrorCode.LOGIN_FAILED, "Login failed");
         }
 
-        String token = jwtService.generateToken(user.getId(), user.getRole());
+        String token = jwtService.generateToken(user.getId(), user.getRole(), user.getNickName());
         RefreshToken refreshToken = refreshTokenService.generateRefreshToken(user.getId());
 
         log.info("Token {}", token);
@@ -107,7 +107,7 @@ public class IdentityService {
 
         refreshTokenRepository.delete(oldRefreshToken);
 
-        String token = jwtService.generateToken(user.getId(), user.getRole());
+        String token = jwtService.generateToken(user.getId(), user.getRole(), user.getNickName());
         RefreshToken newRefreshToken = refreshTokenService.generateRefreshToken(user.getId());
 
         return LoginResult.newBuilder()
