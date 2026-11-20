@@ -50,6 +50,7 @@ input InputWordData {
     word: String!
     translation: String!
     forceDuplicate: Boolean!
+    category: Category!
 }
 
 input SetCategoryInput {

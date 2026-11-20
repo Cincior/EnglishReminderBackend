@@ -1,18 +1,17 @@
 package pl.cinkus.IdentityService.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
-import pl.cinkus.IdentityService.client.RabbitMqMessageSender;
-import pl.cinkus.IdentityService.mapper.UserDataMapper;
 import pl.cinkus.IdentityService.service.IdentityService;
+import pl.cinkus.IdentityService.service.JwtService;
 import pl.cinkus.backend.codegen.types.*;
 
-import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Controller
@@ -20,6 +19,8 @@ import java.util.List;
 
 public class IdentityDataFetcher {
     private final IdentityService identityService;
+    private final JwtService jwtService;
+    private final HttpServletRequest request;
 
     @MutationMapping
     public RegisterPayload register(@Argument NewUserData userData) {
@@ -72,9 +73,25 @@ public class IdentityDataFetcher {
                 .build();
     }
 
-    // Admin panel shall be created and internal networking should be used to get that kind of sensitive data
-//    @QueryMapping
-//    public List<String> getAllUsers() {
-//        return identityService.getAllUsers();
-//    }
+    @MutationMapping
+    public boolean setInstallationId(@Argument String installationId) {
+        identityService.updateInstallationId(getUserId(), installationId);
+        return true;
+    }
+
+    private UUID getUserId() {
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if (authorization == null) {
+             throw new RuntimeException();
+        }
+
+        String token = authorization.substring(7).trim();
+        if (token.isEmpty()) {
+            throw new RuntimeException();
+        }
+
+        String userId = jwtService.getUserId(token);
+        return UUID.fromString(userId);
+    }
 }

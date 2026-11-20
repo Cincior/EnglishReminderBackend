@@ -67,4 +67,5 @@ type Mutation {
     resetPasswordRequest(email: String!): ResetPasswordRequestPayload!
     resetPassword(resetPasswordData: ResetPasswordData!): ResetPasswordPayload!
     logout(refreshToken: String!): LogoutPayload!
+    setInstallationId(installationId: String!): Boolean
 }

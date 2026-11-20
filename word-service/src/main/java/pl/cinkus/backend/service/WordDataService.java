@@ -126,7 +126,7 @@ public class WordDataService {
                 .ownerId(ownerId)
                 .word(inputWordData.getWord())
                 .translation(inputWordData.getTranslation())
-                .category(Category.NOT_LEARNED)
+                .category(WordDataMapper.toEntityCategory(inputWordData.getCategory()))
                 .build();
 
         WordData savedWord = wordDataRepository.save(word);
@@ -144,7 +144,7 @@ public class WordDataService {
         WordData wordData = wordDataRepository.findByOwnerIdAndId(userId, wordId)
                 .orElseThrow(() -> new WordServiceException(ErrorCode.WORD_NOT_FOUND, "We did not find your word!"));
 
-        wordData.setCategory(category);
+        wordData.setCategory(WordDataMapper.toEntityCategory(category));
     }
 
     @Transactional
@@ -177,8 +177,8 @@ public class WordDataService {
                 .orElseThrow(() -> new WordServiceException(ErrorCode.WORD_NOT_FOUND, "We did not find your word!"));
 
         Notification notification = Notification.builder()
-                .fcmToken("FCM_TOKEN")
                 .word(wordData.getWord())
+                .ownerId(userId)
                 .translation(wordData.getTranslation())
                 .dateTime(scheduleTime.toString())
                 .build();

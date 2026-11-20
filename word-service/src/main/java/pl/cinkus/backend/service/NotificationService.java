@@ -11,7 +11,7 @@ import pl.cinkus.backend.repository.NotificationRepository;
 import pl.cinkus.messages.SendMobileNotificationMessage;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Slf4j
@@ -39,10 +39,21 @@ public class NotificationService {
                 notificationOutboxService.releasePublishing(notificationOutbox.getId());
                 continue;
             }
-            if (Instant.parse(n.getDateTime()).isBefore(Instant.now().minus(2, ChronoUnit.SECONDS /* To give some time for handling */))) {
+
+            final Instant scheduledTime;
+            try {
+                scheduledTime = Instant.parse(n.getDateTime());
+            } catch (DateTimeParseException exception) {
+                log.warn("Invalid notification dateTime, skipping outbox {}", notificationOutbox.getId(), exception);
                 notificationOutboxService.releasePublishing(notificationOutbox.getId());
                 continue;
             }
+
+            if (scheduledTime.isAfter(Instant.now())) {
+                notificationOutboxService.releasePublishing(notificationOutbox.getId());
+                continue;
+            }
+
             if (notificationOutbox.getPublishTries() >= 5) {
                 notificationOutboxService.markPublishAttemptFailed(notificationOutbox.getId());
                 continue;
@@ -50,8 +61,8 @@ public class NotificationService {
             log.info("not:" + n);
             rabbitMqMessageSender.sendMessage(SendMobileNotificationMessage.builder()
                             .outboxId(notificationOutbox.getId())
-                            .fcmToken(n.getFcmToken())
                             .word(n.getWord())
+                            .userId(n.getOwnerId())
                             .translation(n.getTranslation())
                             .dateTime(n.getDateTime())
                             .build())

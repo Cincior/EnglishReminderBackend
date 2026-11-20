@@ -30,7 +30,7 @@
         <graphqlcodegen.version>1.61.5</graphqlcodegen.version>
         <build-helper.version>3.5.0</build-helper.version>
         <annotations.version>26.0.2</annotations.version>
-        <com.google.firebase.version>9.7.0</com.google.firebase.version>
+        <com.google.firebase.version>9.10.0</com.google.firebase.version>
     </properties>
 
     <modules>

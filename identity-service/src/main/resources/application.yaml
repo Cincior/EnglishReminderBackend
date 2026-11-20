@@ -3,6 +3,9 @@ spring:
     schema:
       introspection:
         enabled: true
+  grpc:
+    server:
+      port: ${IDENTITY_GRPC_PORT}
   application:
     name: IdentityService
   rabbitmq:
@@ -43,5 +46,6 @@ application:
     name: ${ADMIN_SEED_NAME}
     surname: ${ADMIN_SEED_SURNAME}
     role: ${ADMIN_SEED_ROLE}
+
 server:
   port: ${IDENTITY_SERVICE_PORT:7771}
