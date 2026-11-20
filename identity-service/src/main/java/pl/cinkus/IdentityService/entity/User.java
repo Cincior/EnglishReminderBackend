@@ -42,6 +42,9 @@ public class User {
     @Column(length = 6)
     private String registrationCode;
 
+    @Column
+    private String installationId;
+
     @Builder.Default
     @Column(nullable = false)
     private boolean verified = false;

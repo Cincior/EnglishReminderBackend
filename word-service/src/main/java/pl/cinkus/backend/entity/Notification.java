@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.checkerframework.checker.guieffect.qual.UI;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
@@ -22,7 +23,7 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private String fcmToken;
+    private UUID ownerId;
     private String word;
     private String translation;
     private String dateTime;

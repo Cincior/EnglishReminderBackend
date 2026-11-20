@@ -6,6 +6,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import pl.cinkus.backend.service.NotificationService;
 
+import java.time.Instant;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -15,6 +17,7 @@ public class NotificationScheduler {
     @Scheduled(cron = "*/15 * * * * *")
     public void handleSendingNotifications() {
         log.info("Schedule co x sekund");
+        log.info("Schedule o " + Instant.now());
         notificationService.sendPendingNotifications();
     }
 }

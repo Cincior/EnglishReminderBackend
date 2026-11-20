@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class SendMobileNotificationMessage {
     private UUID outboxId;
-    private String fcmToken;
+    private UUID userId;
     private String word;
     private String translation;
     private String dateTime;

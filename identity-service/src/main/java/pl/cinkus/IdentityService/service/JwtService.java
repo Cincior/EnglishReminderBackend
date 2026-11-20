@@ -31,6 +31,15 @@ public class JwtService {
                 .compact();
 	}
 
+	public String getUserId(String token) {
+		return Jwts.parser()
+				.verifyWith(getSecretKey())
+				.build()
+				.parseSignedClaims(token)
+				.getPayload()
+				.getSubject();
+	}
+
 	private SecretKey getSecretKey() {
 		byte[] key = jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8);
 		return Keys.hmacShaKeyFor(key);

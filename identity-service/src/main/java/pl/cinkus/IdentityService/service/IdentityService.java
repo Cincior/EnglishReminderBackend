@@ -185,4 +185,26 @@ public class IdentityService {
 
         refreshTokenRepository.delete(savedRefreshToken);
     }
+
+    @Transactional
+    public void updateInstallationId(UUID userId, String installationId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() ->
+                        new IdentityServiceException(
+                                ErrorCode.USER_NOT_FOUND,
+                                "User not found"
+                        ));
+
+        user.setInstallationId(installationId);
+    }
+
+    public String getInstallationId(UUID userId) {
+        return userRepository.findById(userId)
+                .map(User::getInstallationId)
+                .orElseThrow(() ->
+                        new IdentityServiceException(
+                                ErrorCode.USER_NOT_FOUND,
+                                "User not found"
+                        ));
+    }
 }

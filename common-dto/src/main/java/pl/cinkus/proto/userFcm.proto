@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "pl.cinkus.grpc";
+option java_outer_classname = "UserFcmProto";
+
+service UserFcmService {
+  rpc getUserFcmToken (GetUserFcmTokenRequest) returns (GetUserFcmTokenResponse);
+}
+
+message GetUserFcmTokenRequest {
+  string user_id = 1;
+}
+
+message GetUserFcmTokenResponse {
+  string fcm_token = 1;
+}

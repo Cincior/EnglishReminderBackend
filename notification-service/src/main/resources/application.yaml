@@ -1,6 +1,11 @@
 spring:
   application:
     name: notification-service
+  grpc:
+    client:
+      channels:
+        identity:
+          address: ${IDENTITY_GRPC_ADDRESS}
   rabbitmq:
     host: ${RABBITMQ_HOST}
     port: ${RABBITMQ_NODE_PORT}
