@@ -17,7 +17,8 @@ public interface NotificationOutboxRepository extends JpaRepository<Notification
     @Query("""
     select o
     from NotificationOutbox o
-    join fetch o.notification
+    join fetch o.notification n
+    join fetch n.word
     where o.isPublished = :isPublished
       and o.isFailed = :isFailed
       and o.isPublishing = :isPublishing

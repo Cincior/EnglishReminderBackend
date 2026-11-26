@@ -48,4 +48,7 @@ public class WordTestResult {
 
     @Column(nullable = false, updatable = false)
     private long testTimeInMilis;
+
+    @Column(nullable = false, updatable = false)
+    private float timeToAnswer;
 }

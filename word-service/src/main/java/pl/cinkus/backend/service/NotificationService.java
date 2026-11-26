@@ -30,7 +30,7 @@ public class NotificationService {
         if (notificationOutboxes.isEmpty()) {
             return;
         }
-        log.info("outboxes:" + notificationOutboxes);
+        log.info("Found {} pending notification outboxes", notificationOutboxes.size());
 
         for (NotificationOutbox notificationOutbox : notificationOutboxes) {
             Notification n = notificationOutbox.getNotification();
@@ -58,10 +58,11 @@ public class NotificationService {
                 notificationOutboxService.markPublishAttemptFailed(notificationOutbox.getId());
                 continue;
             }
-            log.info("not:" + n);
+            log.info("Publishing notification outbox {}", notificationOutbox.getId());
             rabbitMqMessageSender.sendMessage(SendMobileNotificationMessage.builder()
                             .outboxId(notificationOutbox.getId())
-                            .word(n.getWord())
+                            .wordId(n.getWord().getId())
+                            .word(n.getWord().getWord())
                             .userId(n.getOwnerId())
                             .translation(n.getTranslation())
                             .dateTime(n.getDateTime())

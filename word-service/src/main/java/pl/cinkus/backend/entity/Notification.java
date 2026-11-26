@@ -29,7 +29,7 @@ public class Notification {
            name = "wordId"
     )
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private WordData wordId;
+    private WordData word;
     private String translation;
     private String dateTime;
     @CreationTimestamp
