@@ -18,7 +18,12 @@ public class WordDataMapper {
                 : Category.valueOf(category.name());
     }
 
-    public static WordDataDTO toDTO(WordData wordData, float memorizeChance) {
+    public static WordDataDTO toDTO(
+            WordData wordData,
+            float memorizeChance,
+            int correctAnswersCount,
+            int incorrectAnswersCount
+    ) {
         return WordDataDTO.builder()
                 .id(wordData.getId().toString())
                 .word(wordData.getWord())
@@ -26,6 +31,8 @@ public class WordDataMapper {
                 .insertDateTime(wordData.getInsertDateTime())
                 .category(toGraphqlCategory(wordData.getCategory()))
                 .memorizeChance(memorizeChance)
+                .correctAnswersCount(correctAnswersCount)
+                .incorrectAnswersCount(incorrectAnswersCount)
                 .build();
     }
 }

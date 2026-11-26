@@ -14,6 +14,7 @@ import java.util.UUID;
 public class SendMobileNotificationMessage {
     private UUID outboxId;
     private UUID userId;
+    private UUID wordId;
     private String word;
     private String translation;
     private String dateTime;

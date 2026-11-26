@@ -20,4 +20,6 @@ public class WordDataDTO {
     private Instant insertDateTime;
     private Category category;
     private float memorizeChance;
+    private int correctAnswersCount;
+    private int incorrectAnswersCount;
 }

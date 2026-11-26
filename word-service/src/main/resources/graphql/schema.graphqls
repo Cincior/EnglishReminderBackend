@@ -5,6 +5,8 @@ type WordData {
     insertDateTime: String!
     category: Category!
     memorizeChance: Float!
+    correctAnswersCount: Int!
+    incorrectAnswersCount: Int!
 }
 
 enum Category {
@@ -75,7 +77,7 @@ type Query {
 
 type Mutation {
     addWord(input: InputWordData!): AddWordResult!
-    testWord(wordId: ID!, translation: String!): WordTestResultPayload!
+    testWord(wordId: ID!, translation: String!, timeToAnswer: Float!): WordTestResultPayload!
     setCategory(setCategoryInput: SetCategoryInput!): SetCategoryPayload!
     updateWord(input: UpdateWordInput!): UpdateWordPayload!
     deleteWord(wordId: ID!): DeleteWordPayload!

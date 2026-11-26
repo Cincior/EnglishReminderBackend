@@ -41,11 +41,13 @@ public class WordDataFetcher {
     @PreAuthorize("hasRole('USER')")
     public WordTestResultPayload testWord(
             @Argument String wordId,
-            @Argument String translation
+            @Argument String translation,
+            @Argument Float timeToAnswer
     ) {
         var result = wordDataService.testWord(
                 parseUuid(wordId, "wordId"),
                 translation,
+                timeToAnswer,
                 parseUuid(getUserId(), "userId")
         );
         return WordTestResultPayload.newBuilder()

@@ -52,10 +52,19 @@ public class WordDataService {
         }
 
         List<WordTestResult> wordTestResults = wordTestResultRepository.findAllByUserId(ownerId);
+        Map<UUID, Integer> correctAnswersByWordId = new HashMap<>();
+        Map<UUID, Integer> incorrectAnswersByWordId = new HashMap<>();
+        for (WordTestResult result : wordTestResults) {
+            Map<UUID, Integer> answersByWordId = result.isCorrect()
+                    ? correctAnswersByWordId
+                    : incorrectAnswersByWordId;
+            answersByWordId.merge(result.getWordId(), 1, Integer::sum);
+        }
+
         if (wordTestResults.isEmpty()) {
             return wordDataList.stream()
-                    .map(word -> WordDataMapper.toDTO(word, -1))
-                        .toList();
+                    .map(word -> WordDataMapper.toDTO(word, -1, 0, 0))
+                    .toList();
         }
 
         log.info("test: " + wordTestResults);
@@ -64,7 +73,12 @@ public class WordDataService {
         log.info("reqData: " + requestDataList.toString());
         if (requestDataList.isEmpty()) {
             return wordDataList.stream()
-                    .map(word -> WordDataMapper.toDTO(word, -1))
+                    .map(word -> WordDataMapper.toDTO(
+                            word,
+                            -1,
+                            correctAnswersByWordId.getOrDefault(word.getId(), 0),
+                            incorrectAnswersByWordId.getOrDefault(word.getId(), 0)
+                    ))
                     .toList();
         }
 
@@ -79,7 +93,12 @@ public class WordDataService {
         return wordDataList.stream()
                 .map(word -> {
                     float probability = probabilityByWordId.getOrDefault(word.getId().toString(), -1.0f);
-                    return WordDataMapper.toDTO(word, probability);
+                    return WordDataMapper.toDTO(
+                            word,
+                            probability,
+                            correctAnswersByWordId.getOrDefault(word.getId(), 0),
+                            incorrectAnswersByWordId.getOrDefault(word.getId(), 0)
+                    );
                 })
                 .toList();
     }
@@ -101,7 +120,7 @@ public class WordDataService {
     }
 
     @Transactional
-    public WordTestResult testWord(UUID wordId, String translation, UUID userId) {
+    public WordTestResult testWord(UUID wordId, String translation, Float timeToAnswer, UUID userId) {
         validation.validateTranslation(translation);
 
         WordData wordData = wordDataRepository.findByOwnerIdAndId(userId, wordId)
@@ -117,6 +136,7 @@ public class WordDataService {
         result.setUserId(userId);
         result.setCorrect(isCorrect);
         result.setTestTimeInMilis(Instant.now().toEpochMilli());
+        result.setTimeToAnswer(timeToAnswer);
         return wordTestResultRepository.save(result);
     }
 
@@ -177,7 +197,7 @@ public class WordDataService {
                 .orElseThrow(() -> new WordServiceException(ErrorCode.WORD_NOT_FOUND, "We did not find your word!"));
 
         Notification notification = Notification.builder()
-                .word(wordData.getWord())
+                .word(wordData)
                 .ownerId(userId)
                 .translation(wordData.getTranslation())
                 .dateTime(scheduleTime.toString())

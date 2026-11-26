@@ -41,6 +41,7 @@ public class MobileNotificationService {
                                 .setBody(message.getTranslation())
                                 .build()
                 )
+                .putData("wordId", message.getWordId().toString())
                 .build();
     }
 }
